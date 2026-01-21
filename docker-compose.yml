@@ -49,6 +49,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - CHOKIDAR_INTERVAL=250
+      - DOCKER=true
 
 volumes:
   mongo_data:
