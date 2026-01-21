@@ -12,6 +12,8 @@ powershell -ExecutionPolicy Bypass -File .\frontend\scripts\snapshot.ps1
 cd C:\workspace\Nexora\backend
 node scripts/bundle-files.js src
 
+cd C:\workspace\Nexora\frontend
+node scripts/bundle-files.cjs src
 
 ----! docker  !----
 

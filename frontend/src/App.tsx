@@ -113,12 +113,19 @@ export default function App() {
             });
 
             if (!res.ok) {
-                setError(data?.message || "Login failed");
+                // backend error shape: { data:null, error:{ message,... }, meta:{} }
+                setError(data?.error?.message || data?.message || "Login failed");
                 return;
             }
 
-            localStorage.setItem("token", data.token);
-            setToken(data.token);
+            const token = data?.data?.token; // ✅ EZ A HELYES
+            if (!token) {
+                setError("Login response missing token");
+                return;
+            }
+
+            localStorage.setItem("token", token);
+            setToken(token);
         } catch (err) {
             setError("Network error");
         }
@@ -138,21 +145,19 @@ export default function App() {
         setError("");
 
         try {
-            // FONTOS: ehhez kell backend oldalon egy GET /auth/me
             const { res, data } = await apiFetch("/auth/me", { method: "GET" });
 
             if (res.status === 401) {
-                // token lejárt / hibás -> automatikus logout
                 logout();
                 return;
             }
 
             if (!res.ok) {
-                setError(data?.message || "Failed to load profile");
+                setError(data?.error?.message || data?.message || "Failed to load profile");
                 return;
             }
 
-            setMe(data);
+            setMe(data?.data); // ✅ EZ A HELYES
         } catch (err) {
             setError("Network error while loading profile");
         } finally {

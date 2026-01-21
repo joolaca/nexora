@@ -2,7 +2,7 @@ $ErrorActionPreference = "SilentlyContinue"
 
 $root = Split-Path -Parent $PSScriptRoot
 $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-$outFile = Join-Path $PSScriptRoot "snapshot-$timestamp.txt"
+$outFile = Join-Path $PSScriptRoot "snapshot.txt"
 
 function Log($text = "") {
     $text | Tee-Object -FilePath $outFile -Append

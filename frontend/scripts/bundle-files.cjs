@@ -14,12 +14,20 @@ const IGNORE_DIRS = new Set([
     ".cache",
     ".vscode",
     ".idea",
+    "public",        // assetek, nem forráskód
 ]);
 
 const IGNORE_EXTS = new Set([
-    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
+    // képek / assetek
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg",
+
+    // média
     ".mp4", ".mov", ".avi",
+
+    // archive
     ".zip", ".7z", ".rar",
+
+    // egyéb
     ".pdf",
 ]);
 // ------------------------
@@ -65,7 +73,7 @@ function main() {
 
     const files = collectFiles(targetPath).sort();
 
-    // 👉 Output directory: backend/src/script
+    // 👉 Output directory: frontend/scripts
     const outputDir = path.join(projectRoot, "scripts");
 
     if (!fs.existsSync(outputDir)) {
@@ -76,7 +84,7 @@ function main() {
     const outFile = path.join(outputDir, `bundle_${safeName}.txt`);
 
     let output = "";
-    output += `=== FILE BUNDLE ===\n`;
+    output += `=== FRONTEND FILE BUNDLE ===\n`;
     output += `Target: ${target}\n`;
     output += `Files: ${files.length}\n\n`;
 
@@ -90,7 +98,7 @@ function main() {
 
     fs.writeFileSync(outFile, output, "utf8");
 
-    console.log(`✅ Bundle created: ${outFile}`);
+    console.log(`✅ Frontend bundle created: ${outFile}`);
 }
 
 main();

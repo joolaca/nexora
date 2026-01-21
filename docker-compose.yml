@@ -9,20 +9,19 @@ services:
     restart: always
 
   backend:
-
     build:
-      context: ../backend
+      context: ./backend
       dockerfile: Dockerfile
     container_name: nexora-backend
     ports:
       - "5000:5000"
     env_file:
-      - ../backend/.env
+      - ./backend/.env
     depends_on:
       - mongo
     working_dir: /app
     volumes:
-      - ../backend:/app
+      - ./backend:/app
       - /app/node_modules
     command: npm run dev
     restart: always
@@ -31,5 +30,25 @@ services:
       - CHOKIDAR_INTERVAL=250
       - WATCHPACK_POLLING=true
       - WATCHPACK_POLLING_INTERVAL=250
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nexora-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    restart: always
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=250
+
 volumes:
   mongo_data:
