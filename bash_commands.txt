@@ -1,0 +1,22 @@
+----! run dev !----
+docker exec -it nexora-backend npm run dev
+
+----! run seed !----
+docker exec -it nexora-backend npm run seed:dev
+
+----! snapshot !----
+powershell -ExecutionPolicy Bypass -File .\scripts\snapshot.ps1
+powershell -ExecutionPolicy Bypass -File .\frontend\scripts\snapshot.ps1
+
+----! bundle !----
+cd C:\workspace\Nexora\backend
+node scripts/bundle-files.js src
+
+
+----! docker  !----
+
+docker compose build backend
+docker compose up -d
+docker logs -f nexora-backend
+docker exec -it nexora-backend cat /app/src/auth/dto/login.dto.ts
+

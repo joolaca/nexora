@@ -1,0 +1,555 @@
+=== FILE BUNDLE ===
+Target: src
+Files: 19
+
+
+===== FILE: src/app.module.ts =====
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
+import { envValidationSchema } from "./config/env.validation";
+
+@Module({
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            validationSchema: envValidationSchema,
+        }),
+
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: async (config: ConfigService) => ({
+                uri: config.get<string>("MONGO_URI")!,
+            }),
+        }),
+
+        UsersModule,
+        AuthModule,
+    ],
+})
+export class AppModule {}
+
+
+===== FILE: src/auth/auth.controller.ts =====
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { LoginDto } from "./dto/login.dto";
+import { JwtAuthGuard } from "./jwt-auth.guard";
+import { CreateUserDto } from "../users/dto/create-user.dto";
+
+@Controller("auth")
+export class AuthController {
+    constructor(private auth: AuthService) {}
+
+    @Post("login")
+    login(@Body() body: LoginDto) {
+        return this.auth.login(body.username, body.password);
+    }
+
+    @Post("register")
+    async register(@Body() body: CreateUserDto) {
+        // create + auto login
+        return this.auth.registerAndLogin(body.username, body.password);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("me")
+    me(@Req() req: any) {
+        return this.auth.getMe(req.user.userId);
+    }
+
+    @Get("debug")
+    debug() {
+        return { bootId: process.env.BOOT_ID ?? null, pid: process.pid, now: new Date().toISOString(), azta:'paszta' };
+    }
+
+}
+
+
+===== FILE: src/auth/auth.module.ts =====
+import { Module } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
+import { PassportModule } from "@nestjs/passport";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { UsersModule } from "../users/users.module";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { JwtStrategy } from "./jwt.strategy";
+
+@Module({
+    imports: [
+        UsersModule,
+        PassportModule,
+        ConfigModule,
+        JwtModule.registerAsync({
+            inject: [ConfigService],
+            useFactory: async (config: ConfigService) => ({
+                secret: config.get<string>("JWT_SECRET")!,
+                signOptions: { expiresIn: "1d" },
+            }),
+        }),
+    ],
+    controllers: [AuthController],
+    providers: [AuthService, JwtStrategy],
+})
+export class AuthModule {}
+
+
+===== FILE: src/auth/auth.service.ts =====
+//backend/src/auth/auth.service.ts
+import {Injectable, UnauthorizedException} from "@nestjs/common";
+import {JwtService} from "@nestjs/jwt";
+import * as bcrypt from "bcryptjs";
+import {UsersService} from "../users/users.service";
+
+@Injectable()
+export class AuthService {
+    constructor(private users: UsersService, private jwt: JwtService) {
+    }
+
+    async login(username: string, password: string) {
+
+        const user = await this.users.findByUsername(username);
+        if (!user) throw new UnauthorizedException("Invalid credentials");
+
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) throw new UnauthorizedException("Invalid credentials");
+
+        const token = await this.jwt.signAsync(
+            {userId: String(user._id)},
+            {expiresIn: "1d"}
+        );
+
+        return {
+            token,
+            user: {id: String(user._id), username: user.username},
+        };
+    }
+
+    async getMe(userId: string) {
+        const user = await this.users.findById(userId);
+        if (!user) throw new UnauthorizedException("Invalid token");
+
+        return {id: String(user._id), username: user.username};
+    }
+
+    async registerAndLogin(username: string, password: string) {
+        const user = await this.users.createUser(username, password);
+        const token = await this.jwt.signAsync({ userId: user.id }, { expiresIn: "1d" });
+
+        return { token, user };
+    }
+
+}
+
+
+===== FILE: src/auth/dto/login.dto.ts =====
+import { IsString, MinLength } from "class-validator";
+
+export class LoginDto {
+    @IsString()
+    username!: string;
+
+    @IsString()
+    @MinLength(1)
+    password!: string;
+}
+
+
+===== FILE: src/auth/jwt-auth.guard.ts =====
+import { Injectable } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+
+@Injectable()
+export class JwtAuthGuard extends AuthGuard("jwt") {}
+
+
+===== FILE: src/auth/jwt.strategy.ts =====
+import { Injectable } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { ConfigService } from "@nestjs/config";
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+    constructor(config: ConfigService) {
+        super({
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            secretOrKey: config.get<string>("JWT_SECRET")!,
+        });
+    }
+
+    async validate(payload: any) {
+        return { userId: payload.userId };
+    }
+}
+
+
+===== FILE: src/common/filters/http-exception.filter.ts =====
+// backend/src/common/filters/http-exception.filter.ts
+import {
+    ArgumentsHost,
+    Catch,
+    ExceptionFilter,
+    HttpException,
+    HttpStatus,
+} from "@nestjs/common";
+
+function isProductionEnv() {
+    // Nestben tipikusan NODE_ENV=production a prod jel
+    return process.env.NODE_ENV === "production";
+}
+
+/**
+ * Megpróbálja kinyerni a stackből az első "hasznos" sort:
+ * - preferáljuk a saját src/ fájlokat
+ * - ha nincs, akkor az első stack sor
+ */
+function extractThrownAt(stack?: string): string | null {
+    if (!stack) return null;
+
+    const lines = stack.split("\n").map((l) => l.trim());
+    // általában:
+    // 0: Error: message
+    // 1: at Something (path:line:col)
+    const frameLines = lines.filter((l) => l.startsWith("at "));
+
+    // Preferáljuk a projektbeli (src/) frame-et, ne node_modules-t
+    const preferred =
+        frameLines.find((l) => l.includes("/src/")) ||
+        frameLines.find((l) => l.includes("\\src\\")) ||
+        frameLines.find((l) => !l.includes("node_modules")) ||
+        frameLines[0];
+
+    return preferred ?? null;
+}
+
+@Catch()
+export class GlobalHttpExceptionFilter implements ExceptionFilter {
+    catch(exception: any, host: ArgumentsHost) {
+        const ctx = host.switchToHttp();
+        const res = ctx.getResponse();
+        const req = ctx.getRequest();
+
+        const isHttp = exception instanceof HttpException;
+        const status = isHttp
+            ? exception.getStatus()
+            : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        // HttpException esetén van getResponse()
+        const responseBody = isHttp ? exception.getResponse() : null;
+
+        // Alap üzenet (ha semmi nincs)
+        let message: any = exception?.message ?? "Internal error";
+
+        // HttpException.getResponse() lehet string | object
+        if (typeof responseBody === "string") {
+            message = responseBody;
+        } else if (responseBody && typeof responseBody === "object") {
+            const rb = responseBody as Record<string, any>;
+            // Nest default: { statusCode, message, error }
+            message = rb.message ?? message;
+        }
+
+        const showDebug = !isProductionEnv();
+
+        const thrownAt = showDebug ? extractThrownAt(exception?.stack) : null;
+
+        const error = {
+            statusCode: status,
+            // message lehet string vagy string[]
+            message,
+            path: req?.url,
+            method: req?.method,
+
+            // extra, hasznos meta
+            name: showDebug ? exception?.name : undefined,
+
+            // “hol dobta”: első releváns stack sor
+            thrownAt: showDebug ? thrownAt : undefined,
+
+            // stack csak nem prod esetén
+            stack: showDebug ? exception?.stack : undefined,
+        };
+
+        res.status(status).json({
+            data: null,
+            error,
+            meta: { timestamp: new Date().toISOString() },
+        });
+    }
+}
+
+
+===== FILE: src/common/interceptors/response-wrap.interceptor.ts =====
+//backend/src/common/interceptors/response-wrap.interceptor.ts
+import {
+    CallHandler,
+    ExecutionContext,
+    Injectable,
+    NestInterceptor,
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+
+@Injectable()
+export class ResponseWrapInterceptor implements NestInterceptor {
+    intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
+        return next.handle().pipe(
+            map((data) => ({
+                data,
+                meta: { timestamp: new Date().toISOString() },
+            })),
+        );
+    }
+}
+
+
+===== FILE: src/config/env.validation.ts =====
+import * as Joi from "joi";
+
+export const envValidationSchema = Joi.object({
+    PORT: Joi.number().default(5000),
+    MONGO_URI: Joi.string().required(),
+    JWT_SECRET: Joi.string().required(),
+});
+
+
+===== FILE: src/main.ts =====
+//backend/src/main.ts
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ValidationPipe } from "@nestjs/common";
+import { ResponseWrapInterceptor } from "./common/interceptors/response-wrap.interceptor";
+import { GlobalHttpExceptionFilter } from "./common/filters/http-exception.filter";
+
+console.log("BOOT_ID", Date.now(), "PID", process.pid);
+
+async function bootstrap() {
+    const app = await NestFactory.create(AppModule);
+
+    app.enableCors({ origin: true, credentials: true });
+
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalInterceptors(new ResponseWrapInterceptor());
+    app.useGlobalFilters(new GlobalHttpExceptionFilter());
+
+    await app.listen(process.env.PORT ? Number(process.env.PORT) : 5000);
+    console.log("Nest server running");
+}
+
+bootstrap();
+
+
+===== FILE: src/seed/seed.module.ts =====
+// backend/src/seed/seed.module.ts
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { UsersModule } from "../users/users.module";
+import { SeedService } from "./seed.service";
+
+@Module({
+    imports: [
+        MongooseModule.forRoot(process.env.MONGO_URI as string),
+        UsersModule,
+    ],
+    providers: [SeedService],
+})
+export class SeedModule {}
+
+
+===== FILE: src/seed/seed.service.ts =====
+// backend/src/seed/seed.service.ts
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+
+@Injectable()
+export class SeedService {
+    constructor(private readonly users: UsersService) {}
+
+    async run() {
+        const usersRes = await this.users.seedTestUsers(50, "123");
+        return {
+            users: usersRes,
+        };
+    }
+}
+
+
+===== FILE: src/seed/seed.ts =====
+// backend/src/seed/seed.ts
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import * as dotenv from "dotenv";
+import { SeedModule } from "./seed.module";
+import { SeedService } from "./seed.service";
+
+async function bootstrap() {
+    dotenv.config();
+
+    if (process.env.NODE_ENV === "production") {
+        throw new Error("SEED is disabled in production.");
+    }
+    if (!process.env.MONGO_URI) {
+        throw new Error("Missing MONGO_URI");
+    }
+
+    const app = await NestFactory.createApplicationContext(SeedModule, {
+        logger: ["log", "error", "warn"],
+    });
+
+    try {
+        const seedService = app.get(SeedService);
+        const result = await seedService.run();
+        console.log("✅ Seed done:", result);
+    } finally {
+        await app.close();
+        console.log("✅ Seed context closed");
+    }
+}
+
+bootstrap().catch((err) => {
+    console.error("❌ Seed failed:", err);
+    process.exit(1);
+});
+
+
+===== FILE: src/users/dto/create-user.dto.ts =====
+import { IsString, Matches, MaxLength, MinLength } from "class-validator";
+
+export class CreateUserDto{
+    @IsString()
+    @MinLength(3)
+    @MaxLength(32)
+    @Matches(/^[a-z0-9._-]+$/i, {
+        message: "username can contain letters, numbers, dot, underscore, dash",
+    })
+    username!:string;
+
+    @IsString()
+    @MinLength(3)
+    @MaxLength(64)
+    password!:string
+
+}
+
+
+
+===== FILE: src/users/user.schema.ts =====
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { HydratedDocument } from "mongoose";
+
+export type UserDocument = HydratedDocument<User>;
+
+@Schema({ timestamps: true, versionKey: false })
+export class User {
+    @Prop({
+        required: true,
+        trim: true,
+        lowercase: true,
+        unique: true,
+        index: true,
+        minlength: 3,
+        maxlength: 32,
+    })
+    username!: string;
+
+    @Prop({ required: true })
+    password!: string;
+}
+
+
+export const UserSchema = SchemaFactory.createForClass(User);
+
+
+===== FILE: src/users/users.controller.ts =====
+import { Body, Controller, Post } from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { CreateUserDto } from "./dto/create-user.dto";
+
+@Controller("users")
+export class UsersController {
+    constructor(private readonly users: UsersService) {}
+
+}
+
+
+===== FILE: src/users/users.module.ts =====
+//backend/src/users/users.module.ts
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { User, UserSchema } from "./user.schema";
+import { UsersService } from "./users.service";
+import { UsersController } from "./users.controller";
+
+@Module({
+    imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
+    controllers: [UsersController],
+    providers: [UsersService],
+    exports: [UsersService],
+})
+export class UsersModule {}
+
+
+===== FILE: src/users/users.service.ts =====
+//backend/src/users/users.service.ts
+import {ConflictException, Injectable} from "@nestjs/common";
+import {InjectModel} from "@nestjs/mongoose";
+import {Model} from "mongoose";
+import {User, UserDocument} from "./user.schema";
+import * as bcrypt from "bcryptjs";
+
+@Injectable()
+export class UsersService {
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
+    }
+
+    findByUsername(username: string) {
+        return this.userModel.findOne({ username: username.toLowerCase() }).exec();
+    }
+
+    findById(id: string) {
+        return this.userModel.findById(id).exec();
+    }
+
+    async seedTestUsers(count = 50, plainPassword = "123") {
+        const passwordHash = await bcrypt.hash(plainPassword, 10);
+
+        const ops = [];
+        for (let i = 1; i <= count; i++) {
+            ops.push({
+                updateOne: {
+                    filter: {username: `user${i}`},
+                    update: {$setOnInsert: {username: `user${i}`, password: passwordHash}},
+                    upsert: true,
+                },
+            });
+        }
+
+        const res = await this.userModel.bulkWrite(ops, {ordered: false});
+
+        return {
+            inserted: res.upsertedCount || 0,
+            matched: res.matchedCount || 0,
+            modified: res.modifiedCount || 0,
+        };
+    }
+
+
+    async createUser(username: string, plainPassword: string) {
+        const exists = await this.findByUsername(username);
+        if (exists) throw new ConflictException("Username already taken");
+
+        const passwordHash = await bcrypt.hash(plainPassword, 10);
+
+        const created = await this.userModel.create({
+            username,
+            password: passwordHash,
+        });
+
+        return { id: String(created._id), username: created.username };
+    }
+}
+
