@@ -19,26 +19,38 @@ export function LoginPage() {
         (login.error as any)?.message || "Login failed";
 
     return (
-        <div style={{ padding: 24, maxWidth: 360 }}>
-            <h2>Nexora Login</h2>
+        <div className="card shadow-sm">
+            <div className="card-body">
+                <h2 className="h4 mb-3">Nexora Login</h2>
 
-            <form onSubmit={onSubmit}>
-                <div style={{ marginBottom: 12 }}>
-                    <label>Username</label>
-                    <input style={{ width: "100%" }} value={username} onChange={(e) => setUsername(e.target.value)} />
-                </div>
+                <form onSubmit={onSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label">Username</label>
+                        <input
+                            className="form-control"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
 
-                <div style={{ marginBottom: 12 }}>
-                    <label>Password</label>
-                    <input style={{ width: "100%" }} type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-                </div>
+                    <div className="mb-3">
+                        <label className="form-label">Password</label>
+                        <input
+                            className="form-control"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
 
-                {login.isError && <p style={{ color: "red" }}>{errorMsg}</p>}
+                    {login.isError && <div className="alert alert-danger py-2">{errorMsg}</div>}
 
-                <button style={{ width: "100%" }} type="submit" disabled={login.isPending}>
-                    {login.isPending ? "Logging in..." : "Login"}
-                </button>
-            </form>
+                    <button className="btn btn-primary w-100" type="submit" disabled={login.isPending}>
+                        {login.isPending ? "Logging in..." : "Login"}
+                    </button>
+                </form>
+            </div>
         </div>
     );
+
 }

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { loginApi, meApi } from "./authApi";
 import { setToken, getToken, clearToken } from "./tokenStorage";
+import { useCallback } from "react";
 
 export const authKeys = {
     me: ["auth", "me"] as const,
@@ -11,8 +12,8 @@ export function useMe() {
     return useQuery({
         queryKey: authKeys.me,
         queryFn: meApi,
-        enabled: !!token,         // csak ha van token
-        retry: false,             // auth-nál ne retry-zzon végtelenül
+        enabled: !!token,
+        retry: false,
     });
 }
 
@@ -24,7 +25,6 @@ export function useLogin() {
             loginApi(username, password),
         onSuccess: async (data) => {
             setToken(data.token);
-            // login után frissítjük a /me-t
             await qc.invalidateQueries({ queryKey: authKeys.me });
         },
     });
@@ -32,8 +32,9 @@ export function useLogin() {
 
 export function useLogout() {
     const qc = useQueryClient();
-    return () => {
+
+    return useCallback(() => {
         clearToken();
         qc.removeQueries({ queryKey: authKeys.me });
-    };
+    }, [qc]);
 }
