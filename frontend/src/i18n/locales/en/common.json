@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "Nexora"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "login": {
+    "title": "Login",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Login",
+    "pending": "Logging in...",
+    "failed": "Login failed"
+  },
+  "dashboard": {
+    "title": "Dashboard ✅",
+    "reloadProfile": "Reload profile",
+    "loadingProfile": "Loading profile...",
+    "failedProfile": "Failed to load profile"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

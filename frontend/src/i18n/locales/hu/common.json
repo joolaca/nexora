@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "Nexora"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "logout": "Kijelentkezés",
+    "language": "Nyelv"
+  },
+  "login": {
+    "title": "Bejelentkezés",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
+    "submit": "Belépés",
+    "pending": "Beléptetés...",
+    "failed": "Sikertelen belépés"
+  },
+  "dashboard": {
+    "title": "Dashboard ✅",
+    "reloadProfile": "Profil újratöltése",
+    "loadingProfile": "Profil betöltése...",
+    "failedProfile": "Nem sikerült betölteni a profilt"
+  },
+  "common": {
+    "loading": "Betöltés..."
+  }
+}
