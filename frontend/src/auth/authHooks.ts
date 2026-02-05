@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { loginApi, meApi } from "./authApi";
 import { setToken, getToken, clearToken } from "./tokenStorage";
 import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const authKeys = {
     me: ["auth", "me"] as const,
@@ -32,9 +33,13 @@ export function useLogin() {
 
 export function useLogout() {
     const qc = useQueryClient();
+    const navigate = useNavigate();
 
     return useCallback(() => {
         clearToken();
-        qc.removeQueries({ queryKey: authKeys.me });
-    }, [qc]);
+
+        qc.removeQueries({ queryKey: ["auth", "me"] });
+
+        navigate("/login", { replace: true });
+    }, [qc, navigate]);
 }

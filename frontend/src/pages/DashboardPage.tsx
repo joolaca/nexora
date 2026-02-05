@@ -2,7 +2,6 @@ import { useMe, useLogout } from "../auth/authHooks";
 
 export function DashboardPage() {
     const me = useMe();
-    const logout = useLogout();
 
     return (
         <div className="row">
@@ -15,9 +14,6 @@ export function DashboardPage() {
                             <div className="d-flex gap-2">
                                 <button className="btn btn-outline-secondary btn-sm" onClick={() => me.refetch()}>
                                     Reload profile
-                                </button>
-                                <button className="btn btn-outline-danger btn-sm" onClick={logout}>
-                                    Logout
                                 </button>
                             </div>
                         </div>
