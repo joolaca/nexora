@@ -23,5 +23,26 @@
   },
   "common": {
     "loading": "Loading..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "settings": {
+    "title": "Account settings",
+    "currentUser": "Current username",
+    "newUsername": "New username",
+    "newUsernamePh": "Leave empty if unchanged",
+    "newPassword": "New password",
+    "newPasswordPh": "Leave empty if unchanged",
+    "currentPassword": "Current password",
+    "currentPasswordPh": "Required to confirm changes",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "success": "Saved ✅",
+    "failed": "Update failed",
+    "hint": "Tip: You can update username, password, or both."
   }
 }

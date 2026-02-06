@@ -1,10 +1,12 @@
 === FILE BUNDLE ===
 Target: src
-Files: 19
+Files: 20
 
 
 ===== FILE: src/app.module.ts =====
-import { Module } from "@nestjs/common";
+//backend/src/app.module.ts
+import { Module, MiddlewareConsumer, NestModule } from "@nestjs/common";
+import { RequestLoggerMiddleware } from "./common/middleware/request-logger.middleware";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
@@ -29,7 +31,13 @@ import { envValidationSchema } from "./config/env.validation";
         AuthModule,
     ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer
+            .apply(RequestLoggerMiddleware)
+            .forRoutes("*"); // MINDEN route
+    }
+}
 
 
 ===== FILE: src/auth/auth.controller.ts =====
@@ -50,7 +58,6 @@ export class AuthController {
 
     @Post("register")
     async register(@Body() body: CreateUserDto) {
-        // create + auto login
         return this.auth.registerAndLogin(body.username, body.password);
     }
 
@@ -307,6 +314,28 @@ export class ResponseWrapInterceptor implements NestInterceptor {
 }
 
 
+===== FILE: src/common/middleware/request-logger.middleware.ts =====
+//backend/src/common/middleware/request-logger.middleware.ts
+import { Injectable, NestMiddleware } from "@nestjs/common";
+import { Request, Response, NextFunction } from "express";
+
+@Injectable()
+export class RequestLoggerMiddleware implements NestMiddleware {
+    use(req: Request, _res: Response, next: NextFunction) {
+        console.log("➡️ INCOMING REQUEST", {
+            method: req.method,
+            url: req.originalUrl,
+            headers: {
+                authorization: req.headers["authorization"] ?? null,
+            },
+            body: req.body,
+        });
+
+        next();
+    }
+}
+
+
 ===== FILE: src/config/env.validation.ts =====
 import * as Joi from "joi";
 
@@ -344,15 +373,28 @@ bootstrap();
 
 
 ===== FILE: src/seed/seed.module.ts =====
-// backend/src/seed/seed.module.ts
+//backend/src/seed/seed.module.ts
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { UsersModule } from "../users/users.module";
 import { SeedService } from "./seed.service";
+import { envValidationSchema } from "../config/env.validation";
 
 @Module({
     imports: [
-        MongooseModule.forRoot(process.env.MONGO_URI as string),
+        ConfigModule.forRoot({
+            isGlobal: true,
+            validationSchema: envValidationSchema,
+        }),
+
+        MongooseModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: async (config: ConfigService) => ({
+                uri: config.get<string>("MONGO_URI")!,
+            }),
+        }),
+
         UsersModule,
     ],
     providers: [SeedService],

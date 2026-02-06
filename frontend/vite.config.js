@@ -7,10 +7,8 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      "/auth": {
-        target: "http://backend:5000",
-        changeOrigin: true,
-      },
+      "/auth": { target: "http://backend:5000", changeOrigin: true, },
+      "/users": { target: "http://backend:5000", changeOrigin: true },
     },
   },
 });

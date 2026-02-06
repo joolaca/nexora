@@ -6,7 +6,7 @@ docker exec -it nexora-backend npm run seed:dev
 
 ----! snapshot !----
 powershell -ExecutionPolicy Bypass -File .\scripts\snapshot.ps1
-powershell -ExecutionPolicy Bypass -File .\frontend\scripts\snapshot.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\snapshot.ps1
 
 ----! bundle !----
 cd C:\workspace\Nexora\backend

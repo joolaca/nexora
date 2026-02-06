@@ -23,5 +23,26 @@
   },
   "common": {
     "loading": "Betöltés..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Beállítások",
+    "logout": "Kijelentkezés",
+    "language": "Nyelv"
+  },
+  "settings": {
+    "title": "Fiók beállítások",
+    "currentUser": "Jelenlegi felhasználónév",
+    "newUsername": "Új felhasználónév",
+    "newUsernamePh": "Hagyd üresen, ha nem változik",
+    "newPassword": "Új jelszó",
+    "newPasswordPh": "Hagyd üresen, ha nem változik",
+    "currentPassword": "Jelenlegi jelszó",
+    "currentPasswordPh": "A módosításhoz kötelező",
+    "save": "Mentés",
+    "saving": "Mentés...",
+    "success": "Mentve ✅",
+    "failed": "Sikertelen módosítás",
+    "hint": "Tipp: módosíthatod a felhasználónevet, a jelszót, vagy mindkettőt."
   }
 }
