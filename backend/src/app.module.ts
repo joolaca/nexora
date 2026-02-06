@@ -5,6 +5,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
+import { ClansModule } from "./clans/clans.module";
 import { envValidationSchema } from "./config/env.validation";
 
 @Module({
@@ -23,6 +24,7 @@ import { envValidationSchema } from "./config/env.validation";
 
         UsersModule,
         AuthModule,
+        ClansModule,
     ],
 })
 export class AppModule implements NestModule {

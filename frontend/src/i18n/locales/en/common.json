@@ -2,11 +2,6 @@
   "app": {
     "name": "Nexora"
   },
-  "nav": {
-    "dashboard": "Dashboard",
-    "logout": "Logout",
-    "language": "Language"
-  },
   "login": {
     "title": "Login",
     "username": "Username",
@@ -16,16 +11,18 @@
     "failed": "Login failed"
   },
   "dashboard": {
-    "title": "Dashboard ✅",
+    "title": "Dashboard",
     "reloadProfile": "Reload profile",
     "loadingProfile": "Loading profile...",
     "failedProfile": "Failed to load profile"
   },
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "errorGeneric": "Something went wrong"
   },
   "nav": {
     "dashboard": "Dashboard",
+    "clan": "Clan",
     "settings": "Settings",
     "logout": "Logout",
     "language": "Language"
@@ -44,5 +41,32 @@
     "success": "Saved ✅",
     "failed": "Update failed",
     "hint": "Tip: You can update username, password, or both."
+  },
+  "clan": {
+    "title": "Clan",
+    "noClanYet": "You are not in a clan yet.",
+    "name": "Clan name",
+    "namePh": "e.g. Night Owls",
+    "slug": "Clan tag (slug)",
+    "slugPh": "optional, e.g. night-owls",
+    "slugHelp": "Letters, numbers, dash. If empty, it will be generated from the name.",
+    "create": "Create clan",
+    "creating": "Creating...",
+    "created": "Clan created ✅",
+    "createFailed": "Failed to create clan",
+
+    "editTitle": "Edit clan",
+    "editHint": "Only users with permission can edit clan data.",
+    "editName": "New clan name",
+    "editNamePh": "Leave empty if unchanged",
+    "editSlug": "New clan tag (slug)",
+    "editSlugPh": "Leave empty if unchanged",
+    "editSave": "Save clan changes",
+    "editSaving": "Saving...",
+    "editSuccess": "Saved ✅",
+    "editFailed": "Failed to update clan",
+
+    "inClanAs": "Your clan",
+    "myRole": "Your role"
   }
 }

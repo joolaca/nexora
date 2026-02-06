@@ -8,6 +8,8 @@ export type ApiSuccess<T> = {
 export type ApiErrorBody = {
     statusCode: number;
     message: string | string[];
+    code?: string;
+    params?: Record<string, any>;
     path?: string;
     method?: string;
     name?: string;

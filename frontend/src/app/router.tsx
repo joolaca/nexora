@@ -6,6 +6,7 @@ import { RequireAuth } from "../auth/RequireAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { AppLayout } from "../layouts/AppLayout";
 import { SettingsPage } from "../pages/SettingsPage";
+import { ClanPage } from "../clan/components/ClanPage";
 
 export const router = createBrowserRouter([
     {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "/", element: <DashboardPage /> },
                     { path: "/settings", element: <SettingsPage /> },
+                    { path: "/clan", element: <ClanPage /> },
                 ],
             },
         ],

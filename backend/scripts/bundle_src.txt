@@ -1,6 +1,6 @@
 === FILE BUNDLE ===
 Target: src
-Files: 20
+Files: 30
 
 
 ===== FILE: src/app.module.ts =====
@@ -11,6 +11,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
+import { ClansModule } from "./clans/clans.module";
 import { envValidationSchema } from "./config/env.validation";
 
 @Module({
@@ -29,6 +30,7 @@ import { envValidationSchema } from "./config/env.validation";
 
         UsersModule,
         AuthModule,
+        ClansModule,
     ],
 })
 export class AppModule implements NestModule {
@@ -110,6 +112,7 @@ import {Injectable, UnauthorizedException} from "@nestjs/common";
 import {JwtService} from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import {UsersService} from "../users/users.service";
+import {AppException} from "../common/errors/app-exception";
 
 @Injectable()
 export class AuthService {
@@ -119,10 +122,10 @@ export class AuthService {
     async login(username: string, password: string) {
 
         const user = await this.users.findByUsername(username);
-        if (!user) throw new UnauthorizedException("Invalid credentials");
+        if (!user) throw new AppException(409, "INVALID_CREDENTIALS", "Invalid credentials", );
 
         const ok = await bcrypt.compare(password, user.password);
-        if (!ok) throw new UnauthorizedException("Invalid credentials");
+        if (!ok) throw new AppException(409, "INVALID_CREDENTIALS", "Invalid credentials", );
 
         const token = await this.jwt.signAsync(
             {userId: String(user._id)},
@@ -137,7 +140,7 @@ export class AuthService {
 
     async getMe(userId: string) {
         const user = await this.users.findById(userId);
-        if (!user) throw new UnauthorizedException("Invalid token");
+        if (!user) throw new AppException(409, "INVALID_TOKEN", "Invalid token", );
 
         return {id: String(user._id), username: user.username};
     }
@@ -194,6 +197,309 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 }
 
 
+===== FILE: src/clans/clan.schema.ts =====
+// backend/src/clans/clan.schema.ts
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { HydratedDocument, Types } from "mongoose";
+
+export type ClanDocument = HydratedDocument<Clan>;
+
+@Schema({ _id: false })
+export class ClanRole {
+    @Prop({ required: true }) key!: string;
+    @Prop({ required: true }) name!: string;
+    @Prop({ type: [String], default: [] }) permissions!: string[];
+}
+
+export const ClanRoleSchema = SchemaFactory.createForClass(ClanRole);
+
+@Schema({ _id: false })
+export class ClanMember {
+    @Prop({ type: Types.ObjectId, required: true }) userId!: Types.ObjectId;
+    @Prop({ required: true }) roleKey!: string;
+    @Prop({ type: Date, default: Date.now }) joinedAt!: Date;
+}
+
+export const ClanMemberSchema = SchemaFactory.createForClass(ClanMember);
+
+@Schema({ timestamps: true, versionKey: false })
+export class Clan {
+    @Prop({ required: true, trim: true, minlength: 3, maxlength: 32 })
+    name!: string;
+
+    @Prop({ required: true, trim: true, lowercase: true, unique: true, index: true })
+    slug!: string;
+
+    @Prop({ type: [ClanRoleSchema], default: [] })
+    roles!: ClanRole[];
+
+    @Prop({ type: [ClanMemberSchema], default: [] })
+    members!: ClanMember[];
+}
+
+export const ClanSchema = SchemaFactory.createForClass(Clan);
+
+
+===== FILE: src/clans/clans.controller.ts =====
+// backend/src/clans/clans.controller.ts
+import {Body, Controller, Patch, Post, Req, UseGuards} from "@nestjs/common";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CreateClanDto } from "./dto/create-clan.dto";
+import { EditClanDto } from "./dto/edit-clan.dto";
+import { ClansService } from "./clans.service";
+
+@UseGuards(JwtAuthGuard)
+@Controller("clans")
+export class ClansController {
+    constructor(private clans: ClansService) {}
+
+
+    @Post()
+    create(@Req() req: any, @Body() dto: CreateClanDto) {
+        return this.clans.createClan(req.user.userId, dto);
+    }
+
+    @Patch()
+    update(@Req() req:any, @Body() dto: EditClanDto){
+        return this.clans.editClan(req.user.userId, dto)
+    }
+
+}
+
+
+===== FILE: src/clans/clans.module.ts =====
+// backend/src/clans/clans.module.ts
+import { Module } from "@nestjs/common";
+import { MongooseModule } from "@nestjs/mongoose";
+import { Clan, ClanSchema } from "./clan.schema";
+import { ClansController } from "./clans.controller";
+import { ClansService } from "./clans.service";
+
+@Module({
+    imports: [MongooseModule.forFeature([{ name: Clan.name, schema: ClanSchema }])],
+    controllers: [ClansController],
+    providers: [ClansService],
+    exports: [ClansService],
+})
+export class ClansModule {}
+
+
+===== FILE: src/clans/clans.roles.constants.ts =====
+import {ClanPermissions} from "./permissions";
+
+export const BaseRoles = [
+    {
+        key: "owner",
+        name: "Owner",
+        permissions: [
+            ClanPermissions.Edit,
+            ClanPermissions.WallWrite,
+            ClanPermissions.WallModerate,
+            ClanPermissions.RolesManage,
+            ClanPermissions.MembersKick,
+        ],
+    },
+    {
+        key: "admin",
+        name: "Admin",
+        permissions: [
+            ClanPermissions.Edit,
+            ClanPermissions.WallWrite,
+            ClanPermissions.WallModerate,
+        ],
+    },
+    {
+        key: "member",
+        name: "Member",
+        permissions: [],
+    },
+]
+
+===== FILE: src/clans/clans.service.ts =====
+// backend/src/clans/clans.service.ts
+import {ConflictException, Injectable} from "@nestjs/common";
+import {InjectModel} from "@nestjs/mongoose";
+import {Model, Types} from "mongoose";
+import {Clan, ClanDocument} from "./clan.schema";
+import {CreateClanDto} from "./dto/create-clan.dto";
+import {EditClanDto} from "./dto/edit-clan.dto";
+import {ClanPermissions} from "./permissions";
+import {AppException} from "../common/errors/app-exception"
+import {BaseRoles} from "./clans.roles.constants";
+
+function slugify(input: string) {
+    return input
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 32);
+}
+
+@Injectable()
+export class ClansService {
+    constructor(@InjectModel(Clan.name) private clanModel: Model<ClanDocument>) {
+    }
+
+
+    private getMemberRoleKey(clan: ClanDocument, userId: string): string | null {
+        const m = clan.members.find((x) => String(x.userId) === String(userId));
+        return m?.roleKey ?? null;
+    }
+
+    private hasPermission(clan: ClanDocument, userId: string, perm: string): boolean {
+        const roleKey = this.getMemberRoleKey(clan, userId);
+        if (!roleKey) return false;
+
+        const role = clan.roles.find((r) => r.key === roleKey);
+        if (!role) return false;
+
+        return role.permissions.includes(perm);
+    }
+
+    async createClan(ownerUserId: string, dto: CreateClanDto) {
+        const slug = (dto.slug?.trim().toLowerCase() || slugify(dto.name));
+        if (!slug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {slug});
+
+        const exists = await this.clanModel.exists({slug});
+        if (exists) throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", {slug});
+
+
+        const created = await this.clanModel.create({
+            name: dto.name.trim(),
+            slug,
+            roles : BaseRoles,
+            members: [
+                {userId: new Types.ObjectId(ownerUserId), roleKey: "owner"},
+            ],
+        });
+
+        return {
+            id: String(created._id),
+            name: created.name,
+            slug: created.slug,
+            myRole: "owner",
+        };
+    }
+
+    async editClan(userId: string, dto: EditClanDto) {
+        if (!dto.name && !dto.slug) {
+            throw new AppException(400, "NOTHING_TO_UPDATE", "Nothing to update");
+        }
+        const clan = await this.clanModel
+            .findOne({ "members.userId": new Types.ObjectId(userId) })
+            .exec();
+
+        if (!clan) {
+            throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
+        }
+
+        const member = clan.members.find((m) => String(m.userId) === String(userId));
+        if (!member) {
+            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
+        }
+
+        if (!this.hasPermission(clan, userId, ClanPermissions.Edit)) {
+            throw new AppException(403, "NO_PERMISSION", "No permission");
+        }
+
+        if (dto.name) {
+            clan.name = dto.name.trim();
+        }
+
+        if (dto.slug) {
+            const newSlug = dto.slug.trim().toLowerCase();
+            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", { slug: dto.slug });
+
+            if (newSlug !== clan.slug) {
+                const exists = await this.clanModel.exists({ slug: newSlug, _id: { $ne: clan._id } });
+                if (exists) throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", { slug: newSlug });
+                clan.slug = newSlug;
+            }
+        }
+
+        await clan.save();
+
+        return {
+            id: String(clan._id),
+            name: clan.name,
+            slug: clan.slug,
+        };
+    }
+
+}
+
+
+===== FILE: src/clans/dto/create-clan.dto.ts =====
+// backend/src/clans/dto/create-clan.dto.ts
+import { IsString, MaxLength, MinLength, Matches, IsOptional } from "class-validator";
+
+export class CreateClanDto {
+    @IsString()
+    @MinLength(3)
+    @MaxLength(32)
+    name!: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(3)
+    @MaxLength(32)
+    @Matches(/^[a-z0-9-]+$/i, { message: "slug can contain letters, numbers, dash" })
+    slug?: string;
+}
+
+
+===== FILE: src/clans/dto/edit-clan.dto.ts =====
+// backend/src/clans/dto/create-clan.dto.ts
+import { IsString, MaxLength, MinLength, Matches, IsOptional } from "class-validator";
+
+export class EditClanDto {
+    @IsOptional()
+    @IsString()
+    @MinLength(3)
+    @MaxLength(32)
+    name?: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(3)
+    @MaxLength(32)
+    @Matches(/^[a-z0-9-]+$/i, { message: "slug can contain letters, numbers, dash" })
+    slug?: string;
+}
+
+
+===== FILE: src/clans/permissions.ts =====
+// backend/src/clans/permissions.ts
+export const ClanPermissions = {
+    Edit: "clan.edit",
+    WallWrite: "clan.wall.write",
+    WallModerate: "clan.wall.moderate",
+    RolesManage: "clan.roles.manage",
+    MembersKick: "clan.members.kick",
+} as const;
+
+export type ClanPermission = (typeof ClanPermissions)[keyof typeof ClanPermissions];
+
+
+===== FILE: src/common/errors/app-exception.ts =====
+// backend/src/common/errors/app-exception.ts
+import { HttpException, HttpStatus } from "@nestjs/common";
+
+export type ErrorCode = string;
+
+export class AppException extends HttpException {
+    constructor(
+        status: HttpStatus,
+        code: ErrorCode,
+        message: string,
+        params?: Record<string, any>
+    ) {
+        super({ code, message, params }, status);
+    }
+}
+
+
 ===== FILE: src/common/filters/http-exception.filter.ts =====
 // backend/src/common/filters/http-exception.filter.ts
 import {
@@ -205,25 +511,15 @@ import {
 } from "@nestjs/common";
 
 function isProductionEnv() {
-    // Nestben tipikusan NODE_ENV=production a prod jel
     return process.env.NODE_ENV === "production";
 }
 
-/**
- * Megpróbálja kinyerni a stackből az első "hasznos" sort:
- * - preferáljuk a saját src/ fájlokat
- * - ha nincs, akkor az első stack sor
- */
 function extractThrownAt(stack?: string): string | null {
     if (!stack) return null;
 
     const lines = stack.split("\n").map((l) => l.trim());
-    // általában:
-    // 0: Error: message
-    // 1: at Something (path:line:col)
     const frameLines = lines.filter((l) => l.startsWith("at "));
 
-    // Preferáljuk a projektbeli (src/) frame-et, ne node_modules-t
     const preferred =
         frameLines.find((l) => l.includes("/src/")) ||
         frameLines.find((l) => l.includes("\\src\\")) ||
@@ -241,43 +537,42 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
         const req = ctx.getRequest();
 
         const isHttp = exception instanceof HttpException;
+
         const status = isHttp
             ? exception.getStatus()
             : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        // HttpException esetén van getResponse()
         const responseBody = isHttp ? exception.getResponse() : null;
 
-        // Alap üzenet (ha semmi nincs)
         let message: any = exception?.message ?? "Internal error";
+        let code: string | undefined;
+        let params: Record<string, any> | undefined;
 
-        // HttpException.getResponse() lehet string | object
         if (typeof responseBody === "string") {
             message = responseBody;
         } else if (responseBody && typeof responseBody === "object") {
             const rb = responseBody as Record<string, any>;
-            // Nest default: { statusCode, message, error }
+
             message = rb.message ?? message;
+
+            code = rb.code;
+            params = rb.params;
         }
 
         const showDebug = !isProductionEnv();
-
         const thrownAt = showDebug ? extractThrownAt(exception?.stack) : null;
 
         const error = {
             statusCode: status,
-            // message lehet string vagy string[]
+            code,
+            params,
             message,
+
             path: req?.url,
             method: req?.method,
 
-            // extra, hasznos meta
             name: showDebug ? exception?.name : undefined,
-
-            // “hol dobta”: első releváns stack sor
             thrownAt: showDebug ? thrownAt : undefined,
-
-            // stack csak nem prod esetén
             stack: showDebug ? exception?.stack : undefined,
         };
 
@@ -479,6 +774,32 @@ export class CreateUserDto{
 
 
 
+===== FILE: src/users/dto/update-me.dto.ts =====
+// backend/src/users/dto/update-me.dto.ts
+import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+
+export class UpdateMeDto {
+    @IsString()
+    @MinLength(1)
+    currentPassword!: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(3)
+    @MaxLength(32)
+    @Matches(/^[a-z0-9._-]+$/i, {
+        message: "username can contain letters, numbers, dot, underscore, dash",
+    })
+    newUsername?: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(3)
+    @MaxLength(64)
+    newPassword?: string;
+}
+
+
 ===== FILE: src/users/user.schema.ts =====
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
@@ -507,14 +828,26 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 
 ===== FILE: src/users/users.controller.ts =====
-import { Body, Controller, Post } from "@nestjs/common";
+// backend/src/users/users.controller.ts
+import { Body, Controller, Patch, Req, UseGuards, BadRequestException } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { UpdateMeDto } from "./dto/update-me.dto";
 
 @Controller("users")
 export class UsersController {
     constructor(private readonly users: UsersService) {}
 
+    @UseGuards(JwtAuthGuard)
+    @Patch("me")
+    async updateMe(@Req() req: any, @Body() dto: UpdateMeDto) {
+        if (!dto.newUsername && !dto.newPassword) {
+            throw new BadRequestException("Nothing to update");
+        }
+
+        const userId = req.user.userId;
+        return this.users.updateMe(userId, dto);
+    }
 }
 
 
@@ -536,17 +869,17 @@ export class UsersModule {}
 
 
 ===== FILE: src/users/users.service.ts =====
-//backend/src/users/users.service.ts
-import {ConflictException, Injectable} from "@nestjs/common";
-import {InjectModel} from "@nestjs/mongoose";
-import {Model} from "mongoose";
-import {User, UserDocument} from "./user.schema";
+// backend/src/users/users.service.ts
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { User, UserDocument } from "./user.schema";
 import * as bcrypt from "bcryptjs";
+import { UpdateMeDto } from "./dto/update-me.dto";
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
-    }
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
     findByUsername(username: string) {
         return this.userModel.findOne({ username: username.toLowerCase() }).exec();
@@ -563,14 +896,14 @@ export class UsersService {
         for (let i = 1; i <= count; i++) {
             ops.push({
                 updateOne: {
-                    filter: {username: `user${i}`},
-                    update: {$setOnInsert: {username: `user${i}`, password: passwordHash}},
+                    filter: { username: `user${i}` },
+                    update: { $setOnInsert: { username: `user${i}`, password: passwordHash } },
                     upsert: true,
                 },
             });
         }
 
-        const res = await this.userModel.bulkWrite(ops, {ordered: false});
+        const res = await this.userModel.bulkWrite(ops, { ordered: false });
 
         return {
             inserted: res.upsertedCount || 0,
@@ -578,7 +911,6 @@ export class UsersService {
             modified: res.modifiedCount || 0,
         };
     }
-
 
     async createUser(username: string, plainPassword: string) {
         const exists = await this.findByUsername(username);
@@ -592,6 +924,32 @@ export class UsersService {
         });
 
         return { id: String(created._id), username: created.username };
+    }
+
+    async updateMe(userId: string, dto: UpdateMeDto) {
+        const user = await this.userModel.findById(userId).exec();
+        if (!user) throw new BadRequestException("User not found");
+
+        const ok = await bcrypt.compare(dto.currentPassword, user.password);
+        if (!ok) throw new UnauthorizedException("Invalid current password");
+
+        if (dto.newUsername) {
+            const newU = dto.newUsername.trim().toLowerCase();
+
+            if (newU !== user.username) {
+                const exists = await this.userModel.exists({ username: newU, _id: { $ne: user._id } });
+                if (exists) throw new ConflictException("Username already taken");
+                user.username = newU;
+            }
+        }
+
+        if (dto.newPassword) {
+            user.password = await bcrypt.hash(dto.newPassword, 10);
+        }
+
+        await user.save();
+
+        return { id: String(user._id), username: user.username };
     }
 }
 

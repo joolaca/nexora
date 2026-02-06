@@ -3,6 +3,7 @@ import { useLogin } from "../auth/authHooks";
 import { Navigate } from "react-router-dom";
 import { getToken } from "../auth/tokenStorage";
 import { useTranslation } from "react-i18next";
+import { translateApiError } from "../i18n/translateApiError";
 
 export function LoginPage() {
     const { t } = useTranslation();
@@ -17,7 +18,7 @@ export function LoginPage() {
         login.mutate({ username, password });
     };
 
-    const errorMsg = (login.error as any)?.message || t("login.failed");
+    const errorMsg = login.isError ? translateApiError(login.error, t, "login.failed") : "";
 
     return (
         <div className="card shadow-sm">

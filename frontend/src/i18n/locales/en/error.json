@@ -1,0 +1,9 @@
+{
+  "AUTH_INVALID_CREDENTIALS": "Invalid username or password",
+  "AUTH_INVALID_TOKEN": "Your session has expired. Please log in again.",
+  "USERS_USERNAME_TAKEN": "This username is already taken",
+  "USERS_INVALID_CURRENT_PASSWORD": "Current password is incorrect",
+  "CLAN_SLUG_TAKEN": "Clan tag is already taken",
+  "VALIDATION_FAILED": "Please check the form fields",
+  "NO_PERMISSION": "You don't have permission"
+}

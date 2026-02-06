@@ -2,11 +2,6 @@
   "app": {
     "name": "Nexora"
   },
-  "nav": {
-    "dashboard": "Dashboard",
-    "logout": "Kijelentkezés",
-    "language": "Nyelv"
-  },
   "login": {
     "title": "Bejelentkezés",
     "username": "Felhasználónév",
@@ -16,16 +11,18 @@
     "failed": "Sikertelen belépés"
   },
   "dashboard": {
-    "title": "Dashboard ✅",
+    "title": "Dashboard",
     "reloadProfile": "Profil újratöltése",
     "loadingProfile": "Profil betöltése...",
     "failedProfile": "Nem sikerült betölteni a profilt"
   },
   "common": {
-    "loading": "Betöltés..."
+    "loading": "Betöltés...",
+    "errorGeneric": "Hiba történt"
   },
   "nav": {
     "dashboard": "Dashboard",
+    "clan": "Klán",
     "settings": "Beállítások",
     "logout": "Kijelentkezés",
     "language": "Nyelv"
@@ -44,5 +41,32 @@
     "success": "Mentve ✅",
     "failed": "Sikertelen módosítás",
     "hint": "Tipp: módosíthatod a felhasználónevet, a jelszót, vagy mindkettőt."
+  },
+  "clan": {
+    "title": "Klán",
+    "noClanYet": "Még nem vagy klánban.",
+    "name": "Klán neve",
+    "namePh": "pl. Éjjeli Baglyok",
+    "slug": "Klán azonosító (slug)",
+    "slugPh": "opcionális, pl. ejjeli-baglyok",
+    "slugHelp": "Betű, szám, kötőjel. Ha üres, a névből generáljuk.",
+    "create": "Klán létrehozása",
+    "creating": "Létrehozás...",
+    "created": "Klán létrehozva ✅",
+    "createFailed": "Nem sikerült létrehozni a klánt",
+
+    "editTitle": "Klán szerkesztése",
+    "editHint": "Csak jogosultsággal rendelkező tag szerkesztheti a klán adatait.",
+    "editName": "Új klán név",
+    "editNamePh": "Hagyd üresen, ha nem változik",
+    "editSlug": "Új klán azonosító (slug)",
+    "editSlugPh": "Hagyd üresen, ha nem változik",
+    "editSave": "Klán mentése",
+    "editSaving": "Mentés...",
+    "editSuccess": "Mentve ✅",
+    "editFailed": "Nem sikerült módosítani a klánt",
+
+    "inClanAs": "Klánod",
+    "myRole": "Szerepköröd"
   }
 }

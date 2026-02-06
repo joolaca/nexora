@@ -1,0 +1,9 @@
+{
+  "AUTH_INVALID_CREDENTIALS": "Hibás felhasználónév vagy jelszó",
+  "AUTH_INVALID_TOKEN": "Lejárt a munkamenet. Jelentkezz be újra.",
+  "USERS_USERNAME_TAKEN": "Ez a felhasználónév már foglalt",
+  "USERS_INVALID_CURRENT_PASSWORD": "A jelenlegi jelszó hibás",
+  "CLAN_SLUG_TAKEN": "Ez a klán azonosító már foglalt",
+  "VALIDATION_FAILED": "Ellenőrizd az űrlap mezőit",
+  "NO_PERMISSION": "Nincs jogosultságod"
+}

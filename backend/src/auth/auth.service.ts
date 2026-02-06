@@ -3,6 +3,7 @@ import {Injectable, UnauthorizedException} from "@nestjs/common";
 import {JwtService} from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import {UsersService} from "../users/users.service";
+import {AppException} from "../common/errors/app-exception";
 
 @Injectable()
 export class AuthService {
@@ -12,10 +13,10 @@ export class AuthService {
     async login(username: string, password: string) {
 
         const user = await this.users.findByUsername(username);
-        if (!user) throw new UnauthorizedException("Invalid credentials");
+        if (!user) throw new AppException(409, "INVALID_CREDENTIALS", "Invalid credentials", );
 
         const ok = await bcrypt.compare(password, user.password);
-        if (!ok) throw new UnauthorizedException("Invalid credentials");
+        if (!ok) throw new AppException(409, "INVALID_CREDENTIALS", "Invalid credentials", );
 
         const token = await this.jwt.signAsync(
             {userId: String(user._id)},
@@ -30,7 +31,7 @@ export class AuthService {
 
     async getMe(userId: string) {
         const user = await this.users.findById(userId);
-        if (!user) throw new UnauthorizedException("Invalid token");
+        if (!user) throw new AppException(409, "INVALID_TOKEN", "Invalid token", );
 
         return {id: String(user._id), username: user.username};
     }

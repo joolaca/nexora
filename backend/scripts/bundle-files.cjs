@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 const fs = require("fs");
 const path = require("path");
 
@@ -14,12 +13,17 @@ const IGNORE_DIRS = new Set([
     ".cache",
     ".vscode",
     ".idea",
+    "public", // frontend assetek (ha backendben nincs, nem baj)
 ]);
 
 const IGNORE_EXTS = new Set([
-    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico",
+    // képek / assetek
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg",
+    // média
     ".mp4", ".mov", ".avi",
+    // archive
     ".zip", ".7z", ".rar",
+    // egyéb
     ".pdf",
 ]);
 // ------------------------
@@ -65,13 +69,13 @@ function main() {
 
     const files = collectFiles(targetPath).sort();
 
-    // 👉 Output directory: backend/src/script
+    // ✅ Output directory: scripts/bundles (mindkettőnél ugyanaz)
     const outputDir = path.join(projectRoot, "scripts");
+    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-    }
-
+    // ✅ ugyanaz a fájlnév frontend+backend esetén is
+    // pl: target="src" -> bundle_src.txt
+    // pl: target="src/users" -> bundle_src_users.txt
     const safeName = target.replace(/[\\/]/g, "_");
     const outFile = path.join(outputDir, `bundle_${safeName}.txt`);
 
@@ -89,7 +93,6 @@ function main() {
     }
 
     fs.writeFileSync(outFile, output, "utf8");
-
     console.log(`✅ Bundle created: ${outFile}`);
 }
 

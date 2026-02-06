@@ -45,6 +45,11 @@ export function AppLayout() {
                                     {t("nav.settings")}
                                 </NavLink>
                             </li>
+                            <li className="nav-item">
+                                <NavLink className={navLinkClass} to="/clan">
+                                    {t("nav.clan")}
+                                </NavLink>
+                            </li>
                         </ul>
 
                         <div className="d-flex gap-2 align-items-center">

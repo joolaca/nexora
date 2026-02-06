@@ -2,6 +2,8 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useMe, useUpdateMe } from "../auth/authHooks";
 import { useTranslation } from "react-i18next";
+import { translateApiError } from "../i18n/translateApiError";
+
 
 export function SettingsPage() {
     const { t } = useTranslation();
@@ -27,7 +29,7 @@ export function SettingsPage() {
         });
     };
 
-    const errorMsg = (update.error as any)?.message || t("settings.failed");
+    const errorMsg = update.isError ? translateApiError(update.error, t, "settings.failed") : "";
     const okMsg = t("settings.success");
 
     return (
