@@ -20,5 +20,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Docker volumes / data (ha használsz ilyet)
 docker-data/
+/backend/scripts/

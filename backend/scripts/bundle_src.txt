@@ -242,7 +242,7 @@ export const ClanSchema = SchemaFactory.createForClass(Clan);
 
 ===== FILE: src/clans/clans.controller.ts =====
 // backend/src/clans/clans.controller.ts
-import {Body, Controller, Patch, Post, Req, UseGuards} from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { CreateClanDto } from "./dto/create-clan.dto";
 import { EditClanDto } from "./dto/edit-clan.dto";
@@ -253,6 +253,10 @@ import { ClansService } from "./clans.service";
 export class ClansController {
     constructor(private clans: ClansService) {}
 
+    @Get("me")
+    me(@Req() req: any) {
+        return this.clans.getMyClan(req.user.userId);
+    }
 
     @Post()
     create(@Req() req: any, @Body() dto: CreateClanDto) {
@@ -260,10 +264,9 @@ export class ClansController {
     }
 
     @Patch()
-    update(@Req() req:any, @Body() dto: EditClanDto){
-        return this.clans.editClan(req.user.userId, dto)
+    update(@Req() req: any, @Body() dto: EditClanDto) {
+        return this.clans.editClan(req.user.userId, dto);
     }
-
 }
 
 
@@ -426,6 +429,33 @@ export class ClansService {
             slug: clan.slug,
         };
     }
+
+    async getMyClan(userId: string) {
+        const clan = await this.clanModel
+            .findOne({ "members.userId": new Types.ObjectId(userId) })
+            .exec();
+
+        if (!clan) {
+            throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
+        }
+
+        const myRole = this.getMemberRoleKey(clan, userId);
+        if (!myRole) {
+            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
+        }
+
+        const role = clan.roles.find((r) => r.key === myRole);
+        const permissions = role?.permissions ?? [];
+
+        return {
+            id: String(clan._id),
+            name: clan.name,
+            slug: clan.slug,
+            myRole,
+            permissions,
+        };
+    }
+
 
 }
 

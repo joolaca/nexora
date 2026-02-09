@@ -87,11 +87,6 @@ export function SettingsPage() {
                             </button>
                         </form>
 
-                        <hr />
-
-                        <div className="text-muted small">
-                            {t("settings.hint")}
-                        </div>
                     </div>
                 </div>
             </div>

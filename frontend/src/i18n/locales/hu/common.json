@@ -39,8 +39,7 @@
     "save": "Mentés",
     "saving": "Mentés...",
     "success": "Mentve ✅",
-    "failed": "Sikertelen módosítás",
-    "hint": "Tipp: módosíthatod a felhasználónevet, a jelszót, vagy mindkettőt."
+    "failed": "Sikertelen módosítás"
   },
   "clan": {
     "title": "Klán",

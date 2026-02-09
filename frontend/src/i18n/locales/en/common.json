@@ -39,8 +39,7 @@
     "save": "Save changes",
     "saving": "Saving...",
     "success": "Saved ✅",
-    "failed": "Update failed",
-    "hint": "Tip: You can update username, password, or both."
+    "failed": "Update failed"
   },
   "clan": {
     "title": "Clan",
