@@ -1,0 +1,44 @@
+{
+  "title": "Users",
+
+  "toolbar": {
+    "limit": "Limit",
+    "sort": "Sort"
+  },
+
+  "sort": {
+    "rankDesc": "Rank ↓",
+    "rankAsc": "Rank ↑",
+    "usernameAsc": "Username A→Z",
+    "usernameDesc": "Username Z→A"
+  },
+
+  "table": {
+    "rank": "Rank",
+    "username": "Username",
+    "clan": "Clan",
+    "actions": "",
+    "details": "Details",
+    "noClan": "No clan",
+    "empty": "No users."
+  },
+
+  "panel": {
+    "titleFallback": "User",
+    "loading": "Loading...",
+    "notFound": "User not found in current page (try higher limit).",
+
+    "username": "Username",
+    "rank": "Rank",
+    "clan": "Clan",
+    "noClan": "No clan",
+
+    "inviteDisabledTitle": "Invite endpoint next step",
+    "inviteNext": "Invite to my clan (next step)",
+    "alreadyInClan": "This user is already in a clan → no invite."
+  },
+
+  "errors": {
+    "listFailed": "Failed to load users."
+  }
+}

@@ -31,20 +31,21 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
 
     const payload = isJson ? await res.json() : await res.text();
 
-    // SIKER: { data, meta }
     if (res.ok) {
         const ok = payload as ApiSuccess<T>;
         return ok.data;
     }
 
-    // HIBA: { data:null, error, meta }
     const fail = payload as ApiFailure;
     const msg =
         (fail?.error?.message && Array.isArray(fail.error.message) ? fail.error.message.join(", ") : fail?.error?.message) ||
         "Request failed";
 
-    // 401 esetén töröljük a tokent -> a UI majd reagál (RequireAuth / useMe)
-    if (res.status === 401) {
+    const isInvalidToken =
+        res.status === 401 ||
+        (res.status === 409 && fail?.error?.code === "INVALID_TOKEN");
+
+    if (isInvalidToken) {
         clearToken();
     }
 

@@ -1,0 +1,44 @@
+{
+  "title": "Felhasználók",
+
+  "toolbar": {
+    "limit": "Limit",
+    "sort": "Rendezés"
+  },
+
+  "sort": {
+    "rankDesc": "Rank ↓",
+    "rankAsc": "Rank ↑",
+    "usernameAsc": "Felhasználónév A→Z",
+    "usernameDesc": "Felhasználónév Z→A"
+  },
+
+  "table": {
+    "rank": "Rank",
+    "username": "Felhasználónév",
+    "clan": "Klán",
+    "actions": "",
+    "details": "Részletek",
+    "noClan": "Nincs klán",
+    "empty": "Nincs felhasználó."
+  },
+
+  "panel": {
+    "titleFallback": "Felhasználó",
+    "loading": "Betöltés...",
+    "notFound": "A felhasználó nincs benne az aktuális listában (emeld a limitet).",
+
+    "username": "Felhasználónév",
+    "rank": "Rank",
+    "clan": "Klán",
+    "noClan": "Nincs klán",
+
+    "inviteDisabledTitle": "A klánmeghívás endpoint a következő lépés",
+    "inviteNext": "Meghívás a klánomba (következő lépés)",
+    "alreadyInClan": "A felhasználó már klánban van → nincs meghívás."
+  },
+
+  "errors": {
+    "listFailed": "Nem sikerült betölteni a felhasználókat."
+  }
+}

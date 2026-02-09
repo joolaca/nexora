@@ -16,11 +16,44 @@ function range(from: number, to: number): number[] {
     return out;
 }
 
-export async function seedClansWithMembers(params: {
+export async function seedClans(params: {
+    clanModel: Model<ClanDocument>;
+}) {
+    const { clanModel } = params;
+
+    const defs = [
+        { name: "Clan 1", slug: "clan-1" },
+        { name: "Clan 2", slug: "clan-2" },
+        { name: "Clan 3", slug: "clan-3" },
+    ] as const;
+
+    for (const d of defs) {
+        await clanModel.updateOne(
+            { slug: d.slug },
+            {
+                $setOnInsert: { name: d.name, slug: d.slug },
+                $set: { roles: BaseRoles },
+            },
+            { upsert: true }
+        );
+    }
+
+    const clans = await clanModel.find({ slug: { $in: defs.map((d) => d.slug) } }).exec();
+    const bySlug = new Map(clans.map((c) => [c.slug, c]));
+
+    return {
+        clan1: bySlug.get("clan-1")!,
+        clan2: bySlug.get("clan-2")!,
+        clan3: bySlug.get("clan-3")!,
+    };
+}
+
+export async function assignUsersToClans(params: {
     clanModel: Model<ClanDocument>;
     userModel: Model<UserDocument>;
+    clanIds: { clan1Id: Types.ObjectId; clan2Id: Types.ObjectId; clan3Id: Types.ObjectId };
 }) {
-    const { clanModel, userModel } = params;
+    const { clanModel, userModel, clanIds } = params;
 
     const usernames = range(1, 15).map((i) => `user${i}`);
     const users = await userModel
@@ -32,70 +65,53 @@ export async function seedClansWithMembers(params: {
     for (const u of users) idByUsername.set(String(u.username), new Types.ObjectId(String(u._id)));
 
     const getUserId = (n: number) => {
-        const key = `user${n}`;
-        const id = idByUsername.get(key);
-        if (!id) throw new Error(`Clan seed: missing user in DB: ${key}. (Futtasd le előtte a user seedet.)`);
+        const id = idByUsername.get(`user${n}`);
+        if (!id) throw new Error(`Clan assign: missing user${n}. (Előbb user seed!)`);
         return id;
     };
 
-    const defs = [
-        { name: "Clan 1", slug: "clan-1", memberRange: range(1, 5), ownerUserNumber: 1 },
-        { name: "Clan 2", slug: "clan-2", memberRange: range(6, 10), ownerUserNumber: 6 },
-        { name: "Clan 3", slug: "clan-3", memberRange: range(11, 15), ownerUserNumber: 11 },
+    const groups = [
+        { clanId: clanIds.clan1Id, users: range(1, 5), owner: 1 },
+        { clanId: clanIds.clan2Id, users: range(6, 10), owner: 6 },
+        { clanId: clanIds.clan3Id, users: range(11, 15), owner: 11 },
     ] as const;
 
-    const results: any[] = [];
+    await userModel.updateMany(
+        { username: { $in: usernames } },
+        { $set: { clanId: null } }
+    );
 
-    for (const def of defs) {
-        const ownerId = getUserId(def.ownerUserNumber);
+    const allUserIds = groups.flatMap((g) => g.users.map((n) => getUserId(n)));
+    await clanModel.updateMany(
+        { "members.userId": { $in: allUserIds } },
+        { $pull: { members: { userId: { $in: allUserIds } } } }
+    );
 
-        // Tagok listája (owner + többiek random admin/member)
-        const members = def.memberRange.map((n) => {
-            const userId = getUserId(n);
-            const roleKey: RoleKey =
-                n === def.ownerUserNumber ? "owner" : randomNonOwnerRole();
+    for (const g of groups) {
+        const userIds = g.users.map((n) => getUserId(n));
 
-            return { userId, roleKey, joinedAt: new Date() };
-        });
-
-        const userIdsToReset = members.map((m) => m.userId);
-
-        await clanModel.updateOne(
-            { slug: def.slug },
-            {
-                $setOnInsert: { name: def.name, slug: def.slug },
-                $set: { roles: BaseRoles },
-                $pull: { members: { userId: { $in: userIdsToReset } } },
-            },
-            { upsert: true }
+        await userModel.updateMany(
+            { _id: { $in: userIds } },
+            { $set: { clanId: g.clanId } }
         );
 
+        const members = g.users.map((n) => ({
+            userId: getUserId(n),
+            roleKey: n === g.owner ? ("owner" as RoleKey) : randomNonOwnerRole(),
+            joinedAt: new Date(),
+        }));
+
         await clanModel.updateOne(
-            { slug: def.slug },
+            { _id: g.clanId },
             { $push: { members: { $each: members } } }
         );
-
-        const clan = await clanModel.findOne({ slug: def.slug }).exec();
-        if (!clan) throw new Error(`Clan seed: failed to create/find clan: ${def.slug}`);
-
-        const ownerCount = clan.members.filter((m) => m.roleKey === "owner").length;
-        if (ownerCount !== 1) {
-            for (const m of clan.members) {
-                if (String(m.userId) === String(ownerId)) {
-                    m.roleKey = "owner";
-                } else if (def.memberRange.some((n) => String(getUserId(n)) === String(m.userId))) {
-                    if (m.roleKey === "owner") m.roleKey = randomNonOwnerRole();
-                }
-            }
-            await clan.save();
-        }
-
-        results.push({
-            slug: def.slug,
-            owner: `user${def.ownerUserNumber}`,
-            members: def.memberRange.length,
-        });
     }
 
-    return { clansSeeded: results.length, clans: results };
+    return {
+        assigned: groups.map((g) => ({
+            clanId: String(g.clanId),
+            users: g.users.length,
+            owner: `user${g.owner}`,
+        })),
+    };
 }

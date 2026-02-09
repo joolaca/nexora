@@ -1,6 +1,6 @@
 === FILE BUNDLE ===
 Target: src
-Files: 30
+Files: 31
 
 
 ===== FILE: src/app.module.ts =====
@@ -317,6 +317,126 @@ export const BaseRoles = [
         permissions: [],
     },
 ]
+
+===== FILE: src/clans/clans.seed.ts =====
+// backend/src/clans/clans.seed.ts
+import { Model, Types } from "mongoose";
+import { ClanDocument } from "./clan.schema";
+import { BaseRoles } from "./clans.roles.constants";
+import { UserDocument } from "../users/user.schema";
+
+type RoleKey = "owner" | "admin" | "member";
+
+function randomNonOwnerRole(): Exclude<RoleKey, "owner"> {
+    return Math.random() < 0.35 ? "admin" : "member";
+}
+
+function range(from: number, to: number): number[] {
+    const out: number[] = [];
+    for (let i = from; i <= to; i++) out.push(i);
+    return out;
+}
+
+export async function seedClans(params: {
+    clanModel: Model<ClanDocument>;
+}) {
+    const { clanModel } = params;
+
+    const defs = [
+        { name: "Clan 1", slug: "clan-1" },
+        { name: "Clan 2", slug: "clan-2" },
+        { name: "Clan 3", slug: "clan-3" },
+    ] as const;
+
+    for (const d of defs) {
+        await clanModel.updateOne(
+            { slug: d.slug },
+            {
+                $setOnInsert: { name: d.name, slug: d.slug },
+                $set: { roles: BaseRoles },
+            },
+            { upsert: true }
+        );
+    }
+
+    const clans = await clanModel.find({ slug: { $in: defs.map((d) => d.slug) } }).exec();
+    const bySlug = new Map(clans.map((c) => [c.slug, c]));
+
+    return {
+        clan1: bySlug.get("clan-1")!,
+        clan2: bySlug.get("clan-2")!,
+        clan3: bySlug.get("clan-3")!,
+    };
+}
+
+export async function assignUsersToClans(params: {
+    clanModel: Model<ClanDocument>;
+    userModel: Model<UserDocument>;
+    clanIds: { clan1Id: Types.ObjectId; clan2Id: Types.ObjectId; clan3Id: Types.ObjectId };
+}) {
+    const { clanModel, userModel, clanIds } = params;
+
+    const usernames = range(1, 15).map((i) => `user${i}`);
+    const users = await userModel
+        .find({ username: { $in: usernames } }, { _id: 1, username: 1 })
+        .lean()
+        .exec();
+
+    const idByUsername = new Map<string, Types.ObjectId>();
+    for (const u of users) idByUsername.set(String(u.username), new Types.ObjectId(String(u._id)));
+
+    const getUserId = (n: number) => {
+        const id = idByUsername.get(`user${n}`);
+        if (!id) throw new Error(`Clan assign: missing user${n}. (Előbb user seed!)`);
+        return id;
+    };
+
+    const groups = [
+        { clanId: clanIds.clan1Id, users: range(1, 5), owner: 1 },
+        { clanId: clanIds.clan2Id, users: range(6, 10), owner: 6 },
+        { clanId: clanIds.clan3Id, users: range(11, 15), owner: 11 },
+    ] as const;
+
+    await userModel.updateMany(
+        { username: { $in: usernames } },
+        { $set: { clanId: null } }
+    );
+
+    const allUserIds = groups.flatMap((g) => g.users.map((n) => getUserId(n)));
+    await clanModel.updateMany(
+        { "members.userId": { $in: allUserIds } },
+        { $pull: { members: { userId: { $in: allUserIds } } } }
+    );
+
+    for (const g of groups) {
+        const userIds = g.users.map((n) => getUserId(n));
+
+        await userModel.updateMany(
+            { _id: { $in: userIds } },
+            { $set: { clanId: g.clanId } }
+        );
+
+        const members = g.users.map((n) => ({
+            userId: getUserId(n),
+            roleKey: n === g.owner ? ("owner" as RoleKey) : randomNonOwnerRole(),
+            joinedAt: new Date(),
+        }));
+
+        await clanModel.updateOne(
+            { _id: g.clanId },
+            { $push: { members: { $each: members } } }
+        );
+    }
+
+    return {
+        assigned: groups.map((g) => ({
+            clanId: String(g.clanId),
+            users: g.users.length,
+            owner: `user${g.owner}`,
+        })),
+    };
+}
+
 
 ===== FILE: src/clans/clans.service.ts =====
 // backend/src/clans/clans.service.ts
@@ -705,6 +825,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { UsersModule } from "../users/users.module";
 import { SeedService } from "./seed.service";
 import { envValidationSchema } from "../config/env.validation";
+import { ClansModule } from "../clans/clans.module";
+import { Clan, ClanSchema } from "../clans/clan.schema";
+import { User, UserSchema } from "../users/user.schema";
 
 @Module({
     imports: [
@@ -719,8 +842,12 @@ import { envValidationSchema } from "../config/env.validation";
                 uri: config.get<string>("MONGO_URI")!,
             }),
         }),
-
+        MongooseModule.forFeature([
+            { name: User.name, schema: UserSchema },
+            { name: Clan.name, schema: ClanSchema },
+        ]),
         UsersModule,
+        ClansModule,
     ],
     providers: [SeedService],
 })
@@ -730,16 +857,47 @@ export class SeedModule {}
 ===== FILE: src/seed/seed.service.ts =====
 // backend/src/seed/seed.service.ts
 import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
 import { UsersService } from "../users/users.service";
+import { Clan, ClanDocument } from "../clans/clan.schema";
+import { User, UserDocument } from "../users/user.schema";
+import { seedClans, assignUsersToClans } from "../clans/clans.seed";
 
 @Injectable()
 export class SeedService {
-    constructor(private readonly users: UsersService) {}
+    constructor(
+        private readonly users: UsersService,
+        @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>,
+        @InjectModel(User.name) private readonly userModel: Model<UserDocument>
+    ) {}
 
     async run() {
-        const usersRes = await this.users.seedTestUsers(50, "123");
+        // 1) Clans
+        const clans = await seedClans({ clanModel: this.clanModel });
+
+        // 2) Users
+        const usersRes = await this.users.seedTestUsers(150, "123");
+
+        // 3) Assign
+        const assignRes = await assignUsersToClans({
+            clanModel: this.clanModel,
+            userModel: this.userModel,
+            clanIds: {
+                clan1Id: clans.clan1._id,
+                clan2Id: clans.clan2._id,
+                clan3Id: clans.clan3._id,
+            },
+        });
+
         return {
+            clans: {
+                clan1: { id: String(clans.clan1._id), slug: clans.clan1.slug },
+                clan2: { id: String(clans.clan2._id), slug: clans.clan2.slug },
+                clan3: { id: String(clans.clan3._id), slug: clans.clan3.slug },
+            },
             users: usersRes,
+            assign: assignRes,
         };
     }
 }
@@ -831,8 +989,9 @@ export class UpdateMeDto {
 
 
 ===== FILE: src/users/user.schema.ts =====
+
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types  } from "mongoose";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -851,6 +1010,13 @@ export class User {
 
     @Prop({ required: true })
     password!: string;
+
+    @Prop({ required: true, min: 0, default: 0, index: true })
+    rank!: number;
+
+    @Prop({ type: Types.ObjectId, ref: "Clan", default: null, index: true })
+    clanId!: Types.ObjectId | null;
+
 }
 
 
@@ -924,10 +1090,13 @@ export class UsersService {
 
         const ops = [];
         for (let i = 1; i <= count; i++) {
+            let rankRandom = Math.floor(Math.random() * 1000);
             ops.push({
                 updateOne: {
                     filter: { username: `user${i}` },
-                    update: { $setOnInsert: { username: `user${i}`, password: passwordHash } },
+                    update: {
+                        $setOnInsert: { username: `user${i}`, password: passwordHash, rank: rankRandom }
+                    },
                     upsert: true,
                 },
             });

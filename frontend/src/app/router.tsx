@@ -7,6 +7,7 @@ import { AuthLayout } from "../layouts/AuthLayout";
 import { AppLayout } from "../layouts/AppLayout";
 import { SettingsPage } from "../pages/SettingsPage";
 import { ClanPage } from "../clan/components/ClanPage";
+import { UsersPage } from "../users/components/UsersPage";
 
 export const router = createBrowserRouter([
     {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
                     { path: "/", element: <DashboardPage /> },
                     { path: "/settings", element: <SettingsPage /> },
                     { path: "/clan", element: <ClanPage /> },
+                    { path: "/users", element: <UsersPage /> },
                 ],
             },
         ],

@@ -1,5 +1,6 @@
+
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types  } from "mongoose";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -18,6 +19,13 @@ export class User {
 
     @Prop({ required: true })
     password!: string;
+
+    @Prop({ required: true, min: 0, default: 0, index: true })
+    rank!: number;
+
+    @Prop({ type: Types.ObjectId, ref: "Clan", default: null, index: true })
+    clanId!: Types.ObjectId | null;
+
 }
 
 

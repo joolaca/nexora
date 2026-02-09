@@ -12,24 +12,20 @@ function isApiError(err: unknown): err is ApiError {
  * - frontend i18n key: error: { "AUTH_INVALID_CREDENTIALS": "..." }
  */
 export function translateApiError(err: unknown, t: TFunction, fallbackKey = "common.errorGeneric") {
-    // 1) ApiError + van code -> i18n error namespace
     if (isApiError(err)) {
         const code = err.body?.error?.code;
         const params = err.body?.error?.params;
 
         if (code) {
-            const key = code; // egyszerű: kulcs = code
+            const key = code;
             const translated = t(key, { ns: "error", ...(params ?? {}) });
 
-            // ha nincs fordítás, i18next visszaadja a key-t
             if (translated && translated !== key) return translated;
         }
 
-        // 2) Ha nincs code vagy nincs fordítás: backend message (dev barát)
         if (err.message) return err.message;
     }
 
-    // 3) Végső fallback
     const fb = t(fallbackKey);
     return fb && fb !== fallbackKey ? fb : "Request failed";
 }

@@ -46,6 +46,11 @@ export function AppLayout() {
                                 </NavLink>
                             </li>
                             <li className="nav-item">
+                                <NavLink className={navLinkClass} to="/users">
+                                    {t("nav.users")}
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
                                 <NavLink className={navLinkClass} to="/clan">
                                     {t("nav.clan")}
                                 </NavLink>
