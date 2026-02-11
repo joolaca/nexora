@@ -6,12 +6,16 @@ import { User, UserDocument } from "./user.schema";
 import * as bcrypt from "bcryptjs";
 import { UpdateMeDto } from "./dto/update-me.dto";
 import { Clan, ClanDocument } from "../clans/clan.schema";
+import { UsersRepository, type UsersClanFilter, type UsersSortKey } from "./users.repository";
+import { ClansService } from "../clans/clans.service";
+
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectModel(User.name) private userModel: Model<UserDocument>,
-        @InjectModel(Clan.name) private clanModel: Model<ClanDocument>
+        private readonly clansService: ClansService,
+        private readonly usersRepo: UsersRepository
     ) {}
 
     findByUsername(username: string) {
@@ -89,24 +93,29 @@ export class UsersService {
     }
 
 
-    async listUsers(params: { limit?: number; sort?: string }) {
+    async listUsers(params: {
+        limit?: number;
+        page?: number;
+        sort?: UsersSortKey;
+        minRank?: number;
+        maxRank?: number;
+        clan?: UsersClanFilter;
+    }) {
         const limit = params.limit ?? 20;
+        const page = params.page ?? 1;
 
-        const sort = params.sort ?? "rank_desc";
-        const sortMap: Record<string, Record<string, 1 | -1>> = {
-            rank_desc: { rank: -1, username: 1 },
-            rank_asc: { rank: 1, username: 1 },
-            username_asc: { username: 1 },
-            username_desc: { username: -1 },
-        };
-        const sortSpec = sortMap[sort] ?? sortMap.rank_desc;
+        const sort: UsersSortKey = (params.sort ?? "rank_desc") as UsersSortKey;
 
-        const users = await this.userModel
-            .find({}, { username: 1, rank: 1, clanId: 1 })
-            .sort(sortSpec)
-            .limit(limit)
-            .lean()
-            .exec();
+        const skip = (page - 1) * limit;
+
+        const filter = this.usersRepo.buildFilter({
+            minRank: params.minRank,
+            maxRank: params.maxRank,
+            clan: params.clan ?? "any",
+        });
+
+        const total = await this.usersRepo.countUsers(filter);
+        const users = await this.usersRepo.findUsersPage(filter, sort, skip, limit);
 
         const clanIds = Array.from(
             new Set(
@@ -117,19 +126,9 @@ export class UsersService {
             )
         );
 
-        const clans = clanIds.length
-            ? await this.clanModel
-                .find({ _id: { $in: clanIds.map((id) => new Types.ObjectId(id)) } }, { name: 1, slug: 1 })
-                .lean()
-                .exec()
-            : [];
+        const clanById = await this.clansService.getSummariesByIds(clanIds);
 
-        const clanById = new Map<string, { id: string; name: string; slug: string }>();
-        for (const c of clans as any[]) {
-            clanById.set(String(c._id), { id: String(c._id), name: c.name, slug: c.slug });
-        }
-
-        return users.map((u: any) => {
+        const items = users.map((u: any) => {
             const clan = u.clanId ? clanById.get(String(u.clanId)) ?? null : null;
 
             return {
@@ -139,6 +138,27 @@ export class UsersService {
                 clan,
             };
         });
+
+        const totalPages = Math.max(1, Math.ceil(total / limit));
+
+        return {
+            items,
+            meta: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1,
+                sort,
+                filters: {
+                    minRank: params.minRank ?? null,
+                    maxRank: params.maxRank ?? null,
+                    clan: params.clan ?? "any",
+                },
+            },
+        };
     }
+
 
 }

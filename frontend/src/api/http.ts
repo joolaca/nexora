@@ -45,6 +45,8 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
         res.status === 401 ||
         (res.status === 409 && fail?.error?.code === "INVALID_TOKEN");
 
+    console.log(`--🔍--!! res.status ` , res.status );
+
     if (isInvalidToken) {
         clearToken();
     }

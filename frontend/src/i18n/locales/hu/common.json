@@ -54,7 +54,6 @@
     "creating": "Létrehozás...",
     "created": "Klán létrehozva ✅",
     "createFailed": "Nem sikerült létrehozni a klánt",
-
     "editTitle": "Klán szerkesztése",
     "editHint": "Csak jogosultsággal rendelkező tag szerkesztheti a klán adatait.",
     "editName": "Új klán név",
@@ -65,8 +64,27 @@
     "editSaving": "Mentés...",
     "editSuccess": "Mentve ✅",
     "editFailed": "Nem sikerült módosítani a klánt",
-
     "inClanAs": "Klánod",
     "myRole": "Szerepköröd"
+  },
+  "pagination": {
+    "page": "Oldal",
+    "total": "Összesen",
+    "prev": "Előző",
+    "next": "Következő",
+    "loadingPage": "Oldal betöltése..."
+  },
+  "actions": {
+    "reset": "Alaphelyzet"
+  },
+  "toolbar": {
+    "limit": "Limit",
+    "sort": "Rendezés",
+    "minRank": "Min rank",
+    "maxRank": "Max rank",
+    "clan": "Klán",
+    "clanAny": "Mind",
+    "clanIn": "Csak klánban",
+    "clanNone": "Klán nélkül"
   }
 }

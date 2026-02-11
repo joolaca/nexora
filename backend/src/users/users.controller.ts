@@ -23,8 +23,14 @@ export class UsersController {
 
     @Get()
     async list(@Query() q: ListUsersDto) {
-        const items = await this.users.listUsers({ limit: q.limit, sort: q.sort });
-        return items;
+        return this.users.listUsers({
+            limit: q.limit,
+            page: q.page,
+            sort: q.sort,
+            minRank: q.minRank,
+            maxRank: q.maxRank,
+            clan: q.clan,
+        });
     }
 
 }

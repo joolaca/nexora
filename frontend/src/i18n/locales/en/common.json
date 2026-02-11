@@ -68,5 +68,28 @@
 
     "inClanAs": "Your clan",
     "myRole": "Your role"
+  },
+
+  "pagination": {
+    "page": "Page",
+    "total": "Total",
+    "prev": "prev",
+    "next": "next",
+    "loadingPage": "loading Page"
+  },
+  "actions": {
+    "reset": "Reset"
+  },
+  "toolbar": {
+    "limit": "Limit",
+    "sort": "Sort",
+    "minRank": "Min rank",
+    "maxRank": "Max rank",
+    "clan": "Clan",
+    "clanAny": "All",
+    "clanIn": "In a clan",
+    "clanNone": "No clan"
   }
+
+
 }

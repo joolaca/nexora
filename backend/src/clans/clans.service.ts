@@ -8,6 +8,8 @@ import {EditClanDto} from "./dto/edit-clan.dto";
 import {ClanPermissions} from "./permissions";
 import {AppException} from "../common/errors/app-exception"
 import {BaseRoles} from "./clans.roles.constants";
+import {ClansRepository} from "./clans.repository";
+
 
 function slugify(input: string) {
     return input
@@ -20,8 +22,10 @@ function slugify(input: string) {
 
 @Injectable()
 export class ClansService {
-    constructor(@InjectModel(Clan.name) private clanModel: Model<ClanDocument>) {
-    }
+    constructor(
+        @InjectModel(Clan.name) private clanModel: Model<ClanDocument>,
+        private readonly clansRepo: ClansRepository
+    ) {}
 
 
     private getMemberRoleKey(clan: ClanDocument, userId: string): string | null {
@@ -50,7 +54,7 @@ export class ClansService {
         const created = await this.clanModel.create({
             name: dto.name.trim(),
             slug,
-            roles : BaseRoles,
+            roles: BaseRoles,
             members: [
                 {userId: new Types.ObjectId(ownerUserId), roleKey: "owner"},
             ],
@@ -69,7 +73,7 @@ export class ClansService {
             throw new AppException(400, "NOTHING_TO_UPDATE", "Nothing to update");
         }
         const clan = await this.clanModel
-            .findOne({ "members.userId": new Types.ObjectId(userId) })
+            .findOne({"members.userId": new Types.ObjectId(userId)})
             .exec();
 
         if (!clan) {
@@ -91,11 +95,11 @@ export class ClansService {
 
         if (dto.slug) {
             const newSlug = dto.slug.trim().toLowerCase();
-            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", { slug: dto.slug });
+            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {slug: dto.slug});
 
             if (newSlug !== clan.slug) {
-                const exists = await this.clanModel.exists({ slug: newSlug, _id: { $ne: clan._id } });
-                if (exists) throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", { slug: newSlug });
+                const exists = await this.clanModel.exists({slug: newSlug, _id: {$ne: clan._id}});
+                if (exists) throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", {slug: newSlug});
                 clan.slug = newSlug;
             }
         }
@@ -111,7 +115,7 @@ export class ClansService {
 
     async getMyClan(userId: string) {
         const clan = await this.clanModel
-            .findOne({ "members.userId": new Types.ObjectId(userId) })
+            .findOne({"members.userId": new Types.ObjectId(userId)})
             .exec();
 
         if (!clan) {
@@ -135,5 +139,20 @@ export class ClansService {
         };
     }
 
+    async getSummariesByIds(ids: string[]) {
+        const clans = await this.clansRepo.findByIds(ids);
+
+        const map = new Map<string, { id: string; name: string; slug: string }>();
+
+        for (const c of clans as any[]) {
+            map.set(String(c._id), {
+                id: String(c._id),
+                name: c.name,
+                slug: c.slug,
+            });
+        }
+
+        return map;
+    }
 
 }
