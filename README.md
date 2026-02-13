@@ -11,6 +11,12 @@ A projekt célja:
 
 ---
 
+## ▶️ Futtatás (Docker)
+
+```bash
+docker compose up -d --build
+```
+
 ## 🚀 Fő funkciók 
 
 ### 🔐 Felhasználókezelés és bejelentkezés
@@ -46,6 +52,11 @@ A projekt célja:
 - Klánon kívüli felhasználók keresése
 - Meghívók küldése
 - Meghívási állapot kezelése
+
+### 🔍 Klán kereső
+- A felhasználók böngészhetnek és kereshetnek a rendszerben elérhető klánok között
+- Meghívási (csatlakozási) kérelem küldése klánok felé
+- A csatlakozás a kérelem elfogadásakor történik
 
 ---
 
@@ -97,4 +108,70 @@ A projekt célja:
 - Frontend konténer
 - MongoDB konténer
 
+---
 
+## 🧭 Oldaltérkép
+
+### /login
+**Cél:** Bejelentkezés a rendszerbe (JWT token szerzés)  
+**Funkciók:**
+- Email/jelszó megadása
+- Validáció + hibaüzenetek (i18n)
+- Sikeres login után redirect: `/`
+  **Állapotok:** loading, hibás jelszó, szerver hiba  
+  **API:** `POST /auth/login`, utána `GET /auth/me`
+
+### /
+**Cél:** Dashboard / kezdő áttekintés  
+**Funkciók:**
+- Rövid kártyák (users count, clans count) *(ha még nincs, “coming soon”)*  
+  **API:** pl. `GET /stats/summary` *(később)*
+
+### /settings
+**Cél:** Saját profil + nyelv beállítás  
+**Funkciók:**
+- Profil módosítás
+- Nyelvváltás (hu/en)
+  **API:** `PATCH /users/me`
+
+### /users
+**Cél:** Felhasználók listázása, szűrés, kiválasztás  
+**Funkciók:**
+- Paginated lista (limit, rendezés, min/max rank)
+- Kiválasztott user részletek panel
+- Klán meghívó küldése
+- 
+### /clan
+**Cél:** Saját klán kezelése / klán létrehozása 
+**Funkciók:**
+- Taglista, szerepek
+- Klán elhagyása
+- Admin akciók
+- Klán meghívó kezelő
+
+### /clans
+**Cél:** Klán kereső
+**Funkciók:**
+- Részletek megjelenítése
+- Klán jelentkezés küldése
+
+### /clan/join
+**Cél:** Klán meghívó kezelő 
+**Funkciók:**
+- Klánba jelentkezők listája, elfogadás elutasítás ban
+- Lista a felhasználókról akinek meghívó lett küldve, visszavonás
+
+### /clan/news
+**Cél:** Klánhírek megjelenítése
+**Funkciók:**
+- Klán hír létrehozása
+- Joggal rendelkező felhasználók törölhetnek hírt
+
+---
+
+## 🛣️ Roadmap (később)
+- Clan join/invite lejárat (TTL) + értesítések
+- Játék szimulálás. 2 játékos összesorsolása
+- Barát rendszer
+- Üzenetváltás két felhasználó között
+- Rendszer üzenet megjelenítés
