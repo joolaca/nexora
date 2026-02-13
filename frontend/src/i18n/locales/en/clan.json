@@ -1,0 +1,11 @@
+{
+  "invite": {
+    "buttonNext": "Invite to my clan (next step)",
+    "buttonInviting": "Sending invite...",
+    "disabledTitle": "You must be in a clan to send invites.",
+    "userCurrentClan": "Current clan",
+    "userNoClan": "Not in a clan.",
+    "success": "Invite sent.",
+    "error": "Failed to send invite."
+  }
+}

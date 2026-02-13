@@ -2,11 +2,17 @@ services:
   mongo:
     image: mongo:6
     container_name: nexora-mongo
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27018:27017"
     volumes:
       - mongo_data:/data/db
     restart: always
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
 
   backend:
     build:

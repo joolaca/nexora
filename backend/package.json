@@ -9,7 +9,8 @@
     "dev": "nodemon --legacy-watch --watch src --ext ts --exec \"node -r ts-node/register src/main.ts\"",
     "seed": "node dist/seed/seed.js",
     "seed:dev": "ts-node -r dotenv/config src/seed/seed.ts",
-    "snapshot": "powershell -ExecutionPolicy Bypass -File .\\scripts\\snapshot.ps1"
+    "snapshot": "powershell -ExecutionPolicy Bypass -File .\\scripts\\snapshot.ps1",
+    "test": "cross-env NODE_ENV=test MONGO_URI=$MONGO_URI_TEST jest --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -38,9 +39,16 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.14",
+    "@nestjs/testing": "^11.1.13",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^30.0.0",
     "@types/passport-jwt": "^4.0.1",
+    "@types/supertest": "^6.0.3",
+    "archiver": "^7.0.1",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.11",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

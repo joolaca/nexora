@@ -17,10 +17,21 @@ import { envValidationSchema } from "./config/env.validation";
 
         MongooseModule.forRootAsync({
             inject: [ConfigService],
-            useFactory: async (config: ConfigService) => ({
-                uri: config.get<string>("MONGO_URI")!,
-            }),
+            useFactory: async (config: ConfigService) => {
+                const nodeEnv = config.get<string>("NODE_ENV") ?? "development";
+                const uri =
+                    nodeEnv === "test"
+                        ? config.get<string>("MONGO_URI_TEST")
+                        : config.get<string>("MONGO_URI");
+
+                if (!uri) {
+                    throw new Error(`Missing Mongo URI for NODE_ENV=${nodeEnv}`);
+                }
+
+                return { uri };
+            },
         }),
+
 
         UsersModule,
         AuthModule,

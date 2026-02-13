@@ -10,6 +10,9 @@ import enError from "./locales/en/error.json";
 import huUser from "./locales/hu/user.json";
 import enUser from "./locales/en/user.json";
 
+import huClan from "./locales/hu/clan.json";
+import enClan from "./locales/en/clan.json";
+
 const STORAGE_KEY = "nexora_lang";
 
 const saved = localStorage.getItem(STORAGE_KEY);
@@ -17,8 +20,8 @@ const initialLng = saved === "hu" || saved === "en" ? saved : "hu";
 
 i18n.use(initReactI18next).init({
     resources: {
-        hu: { common: huCommon, error: huError, user:huUser },
-        en: { common: enCommon, error: enError, user:enUser },
+        hu: { common: huCommon, error: huError, user:huUser, clan:huClan },
+        en: { common: enCommon, error: enError, user:enUser, clan:enClan },
     },
     lng: initialLng,
     fallbackLng: "en",

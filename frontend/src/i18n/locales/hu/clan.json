@@ -1,0 +1,11 @@
+{
+  "invite": {
+    "buttonNext": "Meghívás a klánomba (következő lépés)",
+    "buttonInviting": "Meghívó küldése...",
+    "disabledTitle": "A meghíváshoz klánban kell lenned.",
+    "userCurrentClan": "Jelenlegi klánja",
+    "userNoClan": "Nincs klánban.",
+    "success": "Meghívó elküldve.",
+    "error": "Nem sikerült meghívót küldeni."
+  }
+}

@@ -55,7 +55,7 @@ export async function assignUsersToClans(params: {
 }) {
     const { clanModel, userModel, clanIds } = params;
 
-    const usernames = range(1, 15).map((i) => `user${i}`);
+    const usernames = range(1, 31).map((i) => `user${i}`);
     const users = await userModel
         .find({ username: { $in: usernames } }, { _id: 1, username: 1 })
         .lean()
@@ -71,15 +71,12 @@ export async function assignUsersToClans(params: {
     };
 
     const groups = [
-        { clanId: clanIds.clan1Id, users: range(1, 5), owner: 1 },
-        { clanId: clanIds.clan2Id, users: range(6, 10), owner: 6 },
-        { clanId: clanIds.clan3Id, users: range(11, 15), owner: 11 },
+        { clanId: clanIds.clan1Id, users: [...range(1, 9), 11], owner: 11 },
+        { clanId: clanIds.clan2Id, users: [...range(12, 20), 21], owner: 21 },
+        { clanId: clanIds.clan3Id, users: [...range(22, 30), 31], owner: 31 },
     ] as const;
 
-    await userModel.updateMany(
-        { username: { $in: usernames } },
-        { $set: { clanId: null } }
-    );
+    await userModel.updateMany({ username: { $in: usernames } }, { $set: { clanId: null } });
 
     const allUserIds = groups.flatMap((g) => g.users.map((n) => getUserId(n)));
     await clanModel.updateMany(
@@ -90,10 +87,7 @@ export async function assignUsersToClans(params: {
     for (const g of groups) {
         const userIds = g.users.map((n) => getUserId(n));
 
-        await userModel.updateMany(
-            { _id: { $in: userIds } },
-            { $set: { clanId: g.clanId } }
-        );
+        await userModel.updateMany({ _id: { $in: userIds } }, { $set: { clanId: g.clanId } });
 
         const members = g.users.map((n) => ({
             userId: getUserId(n),
@@ -101,10 +95,7 @@ export async function assignUsersToClans(params: {
             joinedAt: new Date(),
         }));
 
-        await clanModel.updateOne(
-            { _id: g.clanId },
-            { $push: { members: { $each: members } } }
-        );
+        await clanModel.updateOne({ _id: g.clanId }, { $push: { members: { $each: members } } });
     }
 
     return {
@@ -115,3 +106,4 @@ export async function assignUsersToClans(params: {
         })),
     };
 }
+

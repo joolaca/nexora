@@ -11,6 +11,10 @@ export function useMyClan() {
         queryKey: clanKeys.me,
         queryFn: myClanApi,
         retry: false,
+
+        staleTime: 60_000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
     });
 }
 

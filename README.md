@@ -34,22 +34,6 @@ A projekt célja:
 - Saját bejegyzések törlése
 - Moderációs jogosultságok adminoknak
 
-### 🏆 Ranglista és Kupa szimuláció
-
-A rendszer tartalmaz egy egyszerű, de jól bővíthető kupa és ranglista modult,
-amely szimulált mérkőzéseken keresztül frissíti a felhasználók állását.
-
-#### Funkciók
-- Minden felhasználónak van kupa (score) értéke
-- A rendszer képes két létező játékost véletlenszerűen összepárosítani
-- A szimuláció eldönti:
-    - ki nyer
-    - ki veszít
-
-#### Beállítások
-- Győzelemért járó kupa mennyisége konfigurálható
-- Vereség esetén elveszített kupa mennyisége konfigurálható
-- Szimuláció manuálisan és automatikusan is futtatható
 
 ### 🧬 Migráció és tesztadat generálás
 - Automatikus adatfeltöltés indításkor
@@ -72,14 +56,12 @@ amely szimulált mérkőzéseken keresztül frissíti a felhasználók állásá
 - Főoldal
 - Adatváltoztatás
 - Klán keresés, Jelentezés küldése
-- Játék
-- Raglista
+- Felhasználó keresése, Klán meghívó küldése
 - Klán
   - Faliújság
   - Faliújságra írás
   - Klán elhagyás
   - Klán admin felület
-    - Tagok hívása
     - Tagok kirúgása
     - Jogosultság kiosztás
 
@@ -102,7 +84,6 @@ amely szimulált mérkőzéseken keresztül frissíti a felhasználók állásá
 - DTO validáció
 - Egységes hibakezelés
 - Naplózás
-- Környezetfüggő konfiguráció
 
 ### Adatbázis
 - Optimalizált indexek
@@ -115,8 +96,5 @@ amely szimulált mérkőzéseken keresztül frissíti a felhasználók állásá
 - Backend konténer
 - Frontend konténer
 - MongoDB konténer
-- (később opcionálisan Redis)
 
-Indítás egy paranccsal:
-```bash
-docker-compose up
+
