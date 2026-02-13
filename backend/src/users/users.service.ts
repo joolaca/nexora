@@ -1,49 +1,33 @@
 // backend/src/users/users.service.ts
 import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
-import { User, UserDocument } from "./user.schema";
 import * as bcrypt from "bcryptjs";
 import { UpdateMeDto } from "./dto/update-me.dto";
-import { Clan, ClanDocument } from "../clans/clan.schema";
-import { UsersRepository, type UsersClanFilter, type UsersSortKey } from "./users.repository";
+import { UsersRepository } from "./users.repository";
+import { UsersListRepository, type UsersClanFilter, type UsersSortKey } from "./users.list.repository";
 import { ClansService } from "../clans/clans.service";
-
 
 @Injectable()
 export class UsersService {
     constructor(
-        @InjectModel(User.name) private userModel: Model<UserDocument>,
-        private readonly clansService: ClansService,
-        private readonly usersRepo: UsersRepository
+        private readonly usersRepo: UsersRepository,
+        private readonly usersListRepo: UsersListRepository,
+        private readonly clansService: ClansService
     ) {}
 
+    // Used by AuthService
     findByUsername(username: string) {
-        return this.userModel.findOne({ username: username.toLowerCase() }).exec();
+        return this.usersRepo.findByUsername(username);
     }
 
+    // Used by AuthService
     findById(id: string) {
-        return this.userModel.findById(id).exec();
+        return this.usersRepo.findById(id);
     }
 
     async seedTestUsers(count = 50, plainPassword = "123") {
         const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-        const ops = [];
-        for (let i = 1; i <= count; i++) {
-            let rankRandom = Math.floor(Math.random() * 1000);
-            ops.push({
-                updateOne: {
-                    filter: { username: `user${i}` },
-                    update: {
-                        $setOnInsert: { username: `user${i}`, password: passwordHash, rank: rankRandom }
-                    },
-                    upsert: true,
-                },
-            });
-        }
-
-        const res = await this.userModel.bulkWrite(ops, { ordered: false });
+        const res = await this.usersRepo.bulkUpsertSeedUsers({ count, passwordHash });
 
         return {
             inserted: res.upsertedCount || 0,
@@ -53,21 +37,17 @@ export class UsersService {
     }
 
     async createUser(username: string, plainPassword: string) {
-        const exists = await this.findByUsername(username);
+        const exists = await this.usersRepo.findByUsername(username);
         if (exists) throw new ConflictException("Username already taken");
 
         const passwordHash = await bcrypt.hash(plainPassword, 10);
-
-        const created = await this.userModel.create({
-            username,
-            password: passwordHash,
-        });
+        const created = await this.usersRepo.createUser({ username, passwordHash });
 
         return { id: String(created._id), username: created.username };
     }
 
     async updateMe(userId: string, dto: UpdateMeDto) {
-        const user = await this.userModel.findById(userId).exec();
+        const user = await this.usersRepo.findById(userId);
         if (!user) throw new BadRequestException("User not found");
 
         const ok = await bcrypt.compare(dto.currentPassword, user.password);
@@ -77,7 +57,7 @@ export class UsersService {
             const newU = dto.newUsername.trim().toLowerCase();
 
             if (newU !== user.username) {
-                const exists = await this.userModel.exists({ username: newU, _id: { $ne: user._id } });
+                const exists = await this.usersRepo.existsByUsername(newU, String(user._id));
                 if (exists) throw new ConflictException("Username already taken");
                 user.username = newU;
             }
@@ -87,11 +67,10 @@ export class UsersService {
             user.password = await bcrypt.hash(dto.newPassword, 10);
         }
 
-        await user.save();
+        await this.usersRepo.save(user);
 
         return { id: String(user._id), username: user.username };
     }
-
 
     async listUsers(params: {
         limit?: number;
@@ -103,19 +82,18 @@ export class UsersService {
     }) {
         const limit = params.limit ?? 20;
         const page = params.page ?? 1;
-
         const sort: UsersSortKey = (params.sort ?? "rank_desc") as UsersSortKey;
 
         const skip = (page - 1) * limit;
 
-        const filter = this.usersRepo.buildFilter({
+        const filter = this.usersListRepo.buildFilter({
             minRank: params.minRank,
             maxRank: params.maxRank,
             clan: params.clan ?? "any",
         });
 
-        const total = await this.usersRepo.countUsers(filter);
-        const users = await this.usersRepo.findUsersPage(filter, sort, skip, limit);
+        const total = await this.usersListRepo.countUsers(filter);
+        const users = await this.usersListRepo.findUsersPage(filter, sort, skip, limit);
 
         const clanIds = Array.from(
             new Set(
@@ -130,13 +108,7 @@ export class UsersService {
 
         const items = users.map((u: any) => {
             const clan = u.clanId ? clanById.get(String(u.clanId)) ?? null : null;
-
-            return {
-                id: String(u._id),
-                username: u.username,
-                rank: u.rank,
-                clan,
-            };
+            return { id: String(u._id), username: u.username, rank: u.rank, clan };
         });
 
         const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -159,6 +131,4 @@ export class UsersService {
             },
         };
     }
-
-
 }

@@ -1,11 +1,19 @@
-// backend/src/users/dto/update-me.dto.ts
 import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class UpdateMeDto {
+    @ApiProperty({
+        example: "currentPassword123",
+        description: "Current password (required to authorize the change).",
+    })
     @IsString()
     @MinLength(1)
     currentPassword!: string;
 
+    @ApiPropertyOptional({
+        example: "new_username",
+        description: "New username (optional).",
+    })
     @IsOptional()
     @IsString()
     @MinLength(3)
@@ -15,6 +23,10 @@ export class UpdateMeDto {
     })
     newUsername?: string;
 
+    @ApiPropertyOptional({
+        example: "newSecret123",
+        description: "New password (optional).",
+    })
     @IsOptional()
     @IsString()
     @MinLength(3)

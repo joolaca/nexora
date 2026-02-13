@@ -1,69 +1,57 @@
 // backend/src/users/users.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { User, UserDocument } from "./user.schema";
-
-export type UsersSortKey = "rank_desc" | "rank_asc" | "username_asc" | "username_desc";
-export type UsersClanFilter = "any" | "in" | "none";
-
-export type ListUsersRepoParams = {
-    limit: number;
-    page: number;
-    sort: UsersSortKey;
-
-    minRank?: number;
-    maxRank?: number;
-    clan?: UsersClanFilter;
-};
 
 @Injectable()
 export class UsersRepository {
-    constructor(
-        @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    ) {}
+    constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {}
 
-    buildFilter(params: Pick<ListUsersRepoParams, "minRank" | "maxRank" | "clan">) {
-        const filter: any = {};
+    findByUsername(username: string) {
+        return this.userModel.findOne({ username: username.toLowerCase() }).exec();
+    }
 
-        if (params.minRank !== undefined || params.maxRank !== undefined) {
-            filter.rank = {};
-            if (params.minRank !== undefined) filter.rank.$gte = params.minRank;
-            if (params.maxRank !== undefined) filter.rank.$lte = params.maxRank;
+    findById(id: string) {
+        return this.userModel.findById(id).exec();
+    }
+
+    existsByUsername(username: string, excludeUserId?: string) {
+        const u = username.toLowerCase();
+        const filter: any = { username: u };
+        if (excludeUserId) filter._id = { $ne: excludeUserId };
+        return this.userModel.exists(filter);
+    }
+
+    async createUser(params: { username: string; passwordHash: string; rank?: number }) {
+        return await this.userModel.create({
+            username: params.username.toLowerCase(),
+            password: params.passwordHash,
+            rank: params.rank ?? 0,
+        });
+
+    }
+
+    async save(doc: UserDocument) {
+        return doc.save();
+    }
+
+    async bulkUpsertSeedUsers(params: { count: number; passwordHash: string }) {
+        const ops = [];
+        for (let i = 1; i <= params.count; i++) {
+            const rankRandom = Math.floor(Math.random() * 1000);
+
+            ops.push({
+                updateOne: {
+                    filter: { username: `user${i}` },
+                    update: {
+                        $setOnInsert: { username: `user${i}`, password: params.passwordHash, rank: rankRandom },
+                    },
+                    upsert: true,
+                },
+            });
         }
 
-        if (params.clan === "in") filter.clanId = { $ne: null };
-        if (params.clan === "none") filter.clanId = null;
-
-        return filter;
+        return this.userModel.bulkWrite(ops, { ordered: false });
     }
-
-    getSortSpec(sort: UsersSortKey) {
-        const sortMap: Record<UsersSortKey, Record<string, 1 | -1>> = {
-            rank_desc: { rank: -1, username: 1 },
-            rank_asc: { rank: 1, username: 1 },
-            username_asc: { username: 1 },
-            username_desc: { username: -1 },
-        };
-
-        return sortMap[sort] ?? sortMap.rank_desc;
-    }
-
-    async countUsers(filter: any) {
-        return this.userModel.countDocuments(filter).exec();
-    }
-
-    async findUsersPage(filter: any, sort: UsersSortKey, skip: number, limit: number) {
-        const sortSpec = this.getSortSpec(sort);
-
-        return this.userModel
-            .find(filter, { username: 1, rank: 1, clanId: 1 })
-            .sort(sortSpec)
-            .skip(skip)
-            .limit(limit)
-            .lean()
-            .exec();
-    }
-
-
 }
