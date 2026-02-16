@@ -1,11 +1,44 @@
 {
   "invite": {
-    "buttonNext": "Meghívás a klánomba (következő lépés)",
+    "buttonNext": "Meghívás a klánomba",
     "buttonInviting": "Meghívó küldése...",
     "disabledTitle": "A meghíváshoz klánban kell lenned.",
     "userCurrentClan": "Jelenlegi klánja",
     "userNoClan": "Nincs klánban.",
     "success": "Meghívó elküldve.",
     "error": "Nem sikerült meghívót küldeni."
+  },
+  "menu": {
+    "title": "Klán",
+    "overview": "Saját klán",
+    "requests": "Meghívók"
+  },
+  "request": {
+    "title": "Meghívóim",
+    "loading": "Meghívók betöltése...",
+    "empty": "Nincs függő meghívód.",
+    "error": "Nem sikerült betölteni a meghívókat.",
+    "accept": "Elfogad",
+    "reject": "Elutasít",
+    "accepting": "Elfogadás...",
+    "rejecting": "Elutasítás...",
+    "actionError": "Nem sikerült a művelet.",
+    "columns": {
+      "requestId": "Request ID",
+      "clanId": "Clan ID",
+      "type": "Típus",
+      "status": "Státusz",
+      "createdAt": "Létrehozva",
+      "actions": "Művelet"
+    },
+    "type": {
+      "INVITE": "Klán meghívó"
+    },
+    "status": {
+      "PENDING": "Függőben",
+      "ACCEPTED": "Elfogadva",
+      "REJECTED": "Elutasítva",
+      "CANCELED": "Visszavonva"
+    }
   }
 }

@@ -1,14 +1,15 @@
+// src/clan/overview/pages/ClanOverviewPage.tsx
 import { useTranslation } from "react-i18next";
-import { ClanCreateCard } from "./ClanCreateCard";
-import { ClanEditCard } from "./ClanEditCard";
-import { useMyClan } from "../clanHooks";
-import { ApiError } from "../../api/types";
+import { ClanCreateCard } from "../components/ClanCreateCard";
+import { ClanEditCard } from "../components/ClanEditCard";
+import { useMyClan } from "../hooks/overview.hooks";
+import { ApiError } from "../../../api/types";
 
 function isApiError(err: unknown): err is ApiError {
     return typeof err === "object" && err !== null && (err as any).name === "ApiError";
 }
 
-export function ClanPage() {
+export function ClanOverviewPage() {
     const { t } = useTranslation();
     const myClan = useMyClan();
 

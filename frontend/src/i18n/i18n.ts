@@ -26,7 +26,7 @@ i18n.use(initReactI18next).init({
     lng: initialLng,
     fallbackLng: "en",
     defaultNS: "common",
-    ns: ["common", "error", "user"],
+    ns: ["common", "error", "user", "clan"],
     interpolation: {
         escapeValue: false,
     },

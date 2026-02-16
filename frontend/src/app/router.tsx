@@ -6,8 +6,11 @@ import { RequireAuth } from "../auth/RequireAuth";
 import { AuthLayout } from "../layouts/AuthLayout";
 import { AppLayout } from "../layouts/AppLayout";
 import { SettingsPage } from "../pages/SettingsPage";
-import { ClanPage } from "../clan/components/ClanPage";
 import { UsersPage } from "../users/components/UsersPage";
+
+import { ClanLayout } from "../clan/ClanLayout";
+import { ClanOverviewPage } from "../clan/overview/pages/ClanOverviewPage";
+import { ClanRequestsPage } from "../clan/requests/components/ClanRequestsPage";
 
 export const router = createBrowserRouter([
     {
@@ -22,7 +25,16 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "/", element: <DashboardPage /> },
                     { path: "/settings", element: <SettingsPage /> },
-                    { path: "/clan", element: <ClanPage /> },
+
+                    {
+                        path: "/clan",
+                        element: <ClanLayout />,
+                        children: [
+                            { index: true, element: <ClanOverviewPage /> },
+                            { path: "requests", element: <ClanRequestsPage /> },
+                        ],
+                    },
+
                     { path: "/users", element: <UsersPage /> },
                 ],
             },

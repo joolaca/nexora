@@ -1,6 +1,6 @@
-// src/clan/clanHooks.ts
+// src/clan/overview/hooks/overview.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createClanApi, editClanApi, myClanApi } from "./clanApi";
+import { createClanApi, editClanApi, myClanApi } from "../api/overview.api";
 
 export const clanKeys = {
     me: ["clan", "me"] as const,

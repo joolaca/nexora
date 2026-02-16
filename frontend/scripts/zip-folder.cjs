@@ -117,7 +117,7 @@ async function main() {
 
     // pl: target="src/users" -> bundle_src_users.zip
     const safeName = target.replace(/[\\/]/g, "_");
-    const outFile = path.join(outputDir, `bundle_${safeName}.zip`);
+    const outFile = path.join(outputDir, `zip_${safeName}.zip`);
 
     console.log("📦 Zipping:", target, "->", path.relative(projectRoot, outFile));
     await zipDirectory({ projectRoot, targetPath, outFile });

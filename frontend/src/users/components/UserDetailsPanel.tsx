@@ -1,8 +1,8 @@
 ///src/users/components/UserDetailsPanel.tsx
 import type { UserListItem } from "../usersApi";
 import { useTranslation } from "react-i18next";
-import { useMyClan } from "../../clan/clanHooks";
-import { useInviteToClan } from "../../clan/join/clanJoinHooks";
+import { useMyClan } from "../../clan/overview/hooks/overview.hooks";
+import { useInviteToClan } from "../../clan/requests/hooks/requests.hooks";
 
 type Props = {
     user: UserListItem | null;

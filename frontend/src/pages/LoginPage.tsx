@@ -7,7 +7,7 @@ import { translateApiError } from "../i18n/translateApiError";
 
 export function LoginPage() {
     const { t } = useTranslation();
-    const [username, setUsername] = useState("user1");
+    const [username, setUsername] = useState("user11");
     const [password, setPassword] = useState("123");
     const login = useLogin();
 

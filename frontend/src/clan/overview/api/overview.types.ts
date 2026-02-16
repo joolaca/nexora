@@ -1,5 +1,4 @@
-// src/clan/clanApi.ts
-import { apiFetch } from "../api/http";
+// src/clan/overview/api/overview.types.ts
 
 export type ClanCreateRequest = {
     name: string;
@@ -31,15 +30,3 @@ export type ClanMeResponse = {
     myRole: string;
     permissions?: string[];
 };
-
-export function createClanApi(body: ClanCreateRequest) {
-    return apiFetch<ClanCreateResponse>("/clans", { method: "POST", body });
-}
-
-export function editClanApi(body: ClanEditRequest) {
-    return apiFetch<ClanEditResponse>("/clans", { method: "PATCH", body });
-}
-
-export function myClanApi() {
-    return apiFetch<ClanMeResponse | null>("/clans/me", { method: "GET" });
-}

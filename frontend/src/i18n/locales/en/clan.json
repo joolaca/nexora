@@ -7,5 +7,38 @@
     "userNoClan": "Not in a clan.",
     "success": "Invite sent.",
     "error": "Failed to send invite."
+  },
+  "menu": {
+    "title": "Clan",
+    "overview": "My clan",
+    "requests": "Invitations"
+  },
+  "request": {
+    "title": "My invitations",
+    "loading": "Loading invitations...",
+    "empty": "You have no pending invitations.",
+    "error": "Failed to load invitations.",
+    "accept": "Accept",
+    "reject": "Reject",
+    "accepting": "Accepting...",
+    "rejecting": "Rejecting...",
+    "actionError": "Action failed.",
+    "columns": {
+      "requestId": "Request ID",
+      "clanId": "Clan ID",
+      "type": "Type",
+      "status": "Status",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "type": {
+      "INVITE": "Clan invite"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "CANCELED": "Canceled"
+    }
   }
 }

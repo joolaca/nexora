@@ -1,8 +1,9 @@
+// src/clan/overview/components/ClanEditCard.tsx
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { translateApiError } from "../../i18n/translateApiError";
-import { useEditClan } from "../clanHooks";
-import type { ClanMeResponse } from "../clanApi";
+import { translateApiError } from "../../../i18n/translateApiError";
+import { useEditClan } from "../hooks/overview.hooks";
+import type { ClanMeResponse } from "../api/overview.types";
 
 type Props = {
     clan: ClanMeResponse;

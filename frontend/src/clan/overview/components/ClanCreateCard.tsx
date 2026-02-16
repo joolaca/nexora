@@ -1,7 +1,8 @@
+// src/clan/overview/components/ClanCreateCard.tsx
 import { FormEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useCreateClan } from "../clanHooks";
-import { translateApiError } from "../../i18n/translateApiError";
+import { useCreateClan } from "../hooks/overview.hooks";
+import { translateApiError } from "../../../i18n/translateApiError";
 
 export function ClanCreateCard() {
     const { t } = useTranslation();
