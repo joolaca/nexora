@@ -1,16 +1,10 @@
-// backend/src/clans/join/clan-join.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import {
-    ClanRequest,
-    ClanRequestDocument,
-    ClanRequestStatus,
-    ClanRequestType,
-} from "./clan-request.schema";
+import { ClanRequest, ClanRequestDocument, ClanRequestStatus, ClanRequestType } from "./clan-request.schema";
 
 @Injectable()
-export class ClanJoinRepository {
+export class ClanRequestRepository {
     constructor(
         @InjectModel(ClanRequest.name)
         private readonly reqModel: Model<ClanRequestDocument>
@@ -74,10 +68,7 @@ export class ClanJoinRepository {
 
     async listForUser(userId: string) {
         return this.reqModel
-            .find(
-                { userId: new Types.ObjectId(userId) },
-                { clanId: 1, userId: 1, type: 1, status: 1, createdAt: 1, updatedAt: 1 }
-            )
+            .find({ userId: new Types.ObjectId(userId) }, { clanId: 1, userId: 1, type: 1, status: 1, createdAt: 1, updatedAt: 1 })
             .sort({ createdAt: -1 })
             .lean()
             .exec();
@@ -85,10 +76,7 @@ export class ClanJoinRepository {
 
     async listPendingForClan(clanId: string) {
         return this.reqModel
-            .find(
-                { clanId: new Types.ObjectId(clanId), status: "PENDING" },
-                { clanId: 1, userId: 1, type: 1, status: 1, createdAt: 1 }
-            )
+            .find({ clanId: new Types.ObjectId(clanId), status: "PENDING" }, { clanId: 1, userId: 1, type: 1, status: 1, createdAt: 1 })
             .sort({ createdAt: -1 })
             .lean()
             .exec();

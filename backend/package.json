@@ -6,7 +6,7 @@
     "start": "node dist/main.js",
     "build": "nest build",
     "start:prod": "node dist/main.js",
-    "dev": "nodemon --legacy-watch --watch src --ext ts --exec \"node -r ts-node/register src/main.ts\"",
+    "dev": "nodemon --legacy-watch --watch src --ext ts --exec \"node --enable-source-maps -r ts-node/register src/main.ts\"",
     "seed": "node dist/seed/seed.js",
     "seed:dev": "ts-node -r dotenv/config src/seed/seed.ts",
     "snapshot": "powershell -ExecutionPolicy Bypass -File .\\scripts\\snapshot.ps1",
