@@ -1,4 +1,4 @@
-// backend/src/clans/join/clan-join-request.schema.ts
+// backend/src/clans/requests/clan-join-request.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 
@@ -22,7 +22,12 @@ export class ClanJoinRequest {
     @Prop({ required: true, enum: ["INVITE", "APPLY"], index: true })
     type!: ClanJoinRequestType;
 
-    @Prop({ required: true, enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED"], default: "PENDING", index: true })
+    @Prop({
+        required: true,
+        enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED"],
+        default: "PENDING",
+        index: true,
+    })
     status!: ClanJoinRequestStatus;
 
     @Prop({ type: Types.ObjectId, required: true })

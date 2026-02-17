@@ -1,7 +1,7 @@
-// backend/src/clans/join/clan-join.controller.ts
+// backend/src/clans/requests/clan-requests.controller.ts
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
-import { ClanJoinService } from "./clan-join.service";
+import { ClanRequestsService } from "./clan-requests.service";
 import { InviteToClanDto } from "./dto/invite.dto";
 import {
     ApiBearerAuth,
@@ -16,13 +16,13 @@ import {
     ApiConflictResponse,
 } from "@nestjs/swagger";
 
-@ApiTags("Clan Join")
+@ApiTags("Clan Requests")
 @ApiBearerAuth("access-token")
 @ApiUnauthorizedResponse({ description: "Missing, invalid, or expired token." })
 @UseGuards(JwtAuthGuard)
 @Controller("clans")
-export class ClanJoinController {
-    constructor(private readonly join: ClanJoinService) {}
+export class ClanRequestsController {
+    constructor(private readonly reqs: ClanRequestsService) {}
 
     @ApiOperation({
         summary: "Apply to a clan",
@@ -34,7 +34,7 @@ export class ClanJoinController {
     @ApiConflictResponse({ description: "User already in a clan or request not in valid state." })
     @Post(":clanId/apply")
     apply(@Req() req: any, @Param("clanId") clanId: string) {
-        return this.join.applyToClan({ actorUserId: req.user.userId, clanId });
+        return this.reqs.applyToClan({ actorUserId: req.user.userId, clanId });
     }
 
     @ApiOperation({
@@ -49,7 +49,7 @@ export class ClanJoinController {
     @ApiConflictResponse({ description: "Target user already in a clan or request not in valid state." })
     @Post(":clanId/invite")
     invite(@Req() req: any, @Param("clanId") clanId: string, @Body() dto: InviteToClanDto) {
-        return this.join.inviteToClan({
+        return this.reqs.inviteToClan({
             actorUserId: req.user.userId,
             clanId,
             targetUserId: dto.userId,
@@ -57,13 +57,13 @@ export class ClanJoinController {
     }
 
     @ApiOperation({
-        summary: "List my join requests",
+        summary: "List my requests",
         description: "Lists all requests related to the current user (APPLY + INVITE history).",
     })
     @ApiOkResponse({ description: "List of requests for the current user." })
     @Get("requests/me")
     my(@Req() req: any) {
-        return this.join.listMyRequests(req.user.userId);
+        return this.reqs.listMyRequests(req.user.userId);
     }
 
     @ApiOperation({
@@ -76,7 +76,7 @@ export class ClanJoinController {
     @ApiNotFoundResponse({ description: "Clan not found." })
     @Get(":clanId/requests")
     clanPending(@Req() req: any, @Param("clanId") clanId: string) {
-        return this.join.listClanPendingRequests({ actorUserId: req.user.userId, clanId });
+        return this.reqs.listClanPendingRequests({ actorUserId: req.user.userId, clanId });
     }
 
     @ApiOperation({
@@ -90,7 +90,7 @@ export class ClanJoinController {
     @ApiConflictResponse({ description: "Request is not pending or user already in a clan." })
     @Post("requests/:requestId/accept")
     accept(@Req() req: any, @Param("requestId") requestId: string) {
-        return this.join.acceptRequest({ actorUserId: req.user.userId, requestId });
+        return this.reqs.acceptRequest({ actorUserId: req.user.userId, requestId });
     }
 
     @ApiOperation({
@@ -104,7 +104,7 @@ export class ClanJoinController {
     @ApiConflictResponse({ description: "Request is not pending." })
     @Post("requests/:requestId/reject")
     reject(@Req() req: any, @Param("requestId") requestId: string) {
-        return this.join.rejectRequest({ actorUserId: req.user.userId, requestId });
+        return this.reqs.rejectRequest({ actorUserId: req.user.userId, requestId });
     }
 
     @ApiOperation({
@@ -118,6 +118,6 @@ export class ClanJoinController {
     @ApiConflictResponse({ description: "Request is not pending." })
     @Post("requests/:requestId/cancel")
     cancel(@Req() req: any, @Param("requestId") requestId: string) {
-        return this.join.cancelRequest({ actorUserId: req.user.userId, requestId });
+        return this.reqs.cancelRequest({ actorUserId: req.user.userId, requestId });
     }
 }

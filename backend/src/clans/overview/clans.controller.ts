@@ -1,9 +1,9 @@
-// backend/src/clans/clans.controller.ts
+// backend/src/clans/overview/clans.controller.ts
 import { Body, Controller, Get, Patch, Post, Req, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { CreateClanDto } from "./dto/create-clan.dto";
-import { EditClanDto } from "./dto/edit-clan.dto";
-import { ClansService } from "./clans.service";
+import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
+import { CreateClanDto } from "../dto/create-clan.dto";
+import { EditClanDto } from "../dto/edit-clan.dto";
+import { ClansService } from "../clans.service";
 import {
     ApiBearerAuth,
     ApiBadRequestResponse,

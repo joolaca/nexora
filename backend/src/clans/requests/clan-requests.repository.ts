@@ -1,4 +1,4 @@
-// backend/src/clans/join/clan-join.repository.ts
+// backend/src/clans/requests/clan-requests.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -10,7 +10,7 @@ import {
 } from "./clan-join-request.schema";
 
 @Injectable()
-export class ClanJoinRepository {
+export class ClanRequestsRepository {
     constructor(
         @InjectModel(ClanJoinRequest.name)
         private readonly reqModel: Model<ClanJoinRequestDocument>
@@ -21,11 +21,13 @@ export class ClanJoinRepository {
     }
 
     async findPending(clanId: string, userId: string) {
-        return this.reqModel.findOne({
-            clanId: new Types.ObjectId(clanId),
-            userId: new Types.ObjectId(userId),
-            status: "PENDING",
-        }).exec();
+        return this.reqModel
+            .findOne({
+                clanId: new Types.ObjectId(clanId),
+                userId: new Types.ObjectId(userId),
+                status: "PENDING",
+            })
+            .exec();
     }
 
     async createPending(params: {

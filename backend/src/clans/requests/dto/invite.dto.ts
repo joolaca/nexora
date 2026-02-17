@@ -1,3 +1,4 @@
+// backend/src/clans/requests/dto/invite.dto.ts
 import { IsMongoId } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 

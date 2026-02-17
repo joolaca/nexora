@@ -1,18 +1,21 @@
 // backend/src/clans/clans.module.ts
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+
 import { Clan, ClanSchema } from "./clan.schema";
-import { ClansController } from "./clans.controller";
-import { ClansService } from "./clans.service";
 import { ClansRepository } from "./clans.repository";
+import { ClansService } from "./clans.service";
 
-// ✅ join feature
-import { ClanJoinController } from "./join/clan-join.controller";
-import { ClanJoinService } from "./join/clan-join.service";
-import { ClanJoinRepository } from "./join/clan-join.repository";
-import { ClanJoinRequest, ClanJoinRequestSchema } from "./join/clan-join-request.schema";
+// ✅ overview domain
+import { ClansController } from "./overview/clans.controller";
 
-// ✅ user model (joinhoz kell)
+// ✅ requests domain (régi join)
+import { ClanRequestsController } from "./requests/clan-requests.controller";
+import { ClanRequestsService } from "./requests/clan-requests.service";
+import { ClanRequestsRepository } from "./requests/clan-requests.repository";
+import { ClanJoinRequest, ClanJoinRequestSchema } from "./requests/clan-join-request.schema";
+
+// ✅ user model kell a requests-hez
 import { User, UserSchema } from "../users/user.schema";
 
 @Module({
@@ -23,8 +26,8 @@ import { User, UserSchema } from "../users/user.schema";
             { name: User.name, schema: UserSchema },
         ]),
     ],
-    controllers: [ClansController, ClanJoinController],
-    providers: [ClansService, ClansRepository, ClanJoinService, ClanJoinRepository],
+    controllers: [ClansController, ClanRequestsController],
+    providers: [ClansService, ClansRepository, ClanRequestsService, ClanRequestsRepository],
     exports: [ClansService],
 })
 export class ClansModule {}

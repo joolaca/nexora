@@ -1,4 +1,4 @@
-// backend/src/clans/join/clan-join.service.ts
+// backend/src/clans/requests/clan-requests.service.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -6,15 +6,14 @@ import { Clan, ClanDocument } from "../clan.schema";
 import { User, UserDocument } from "../../users/user.schema";
 import { ClanPermissions } from "../permissions";
 import { AppException } from "../../common/errors/app-exception";
-import { ClanJoinRepository } from "./clan-join.repository";
-import { ClanJoinRequestType } from "./clan-join-request.schema";
+import { ClanRequestsRepository } from "./clan-requests.repository";
 
 @Injectable()
-export class ClanJoinService {
+export class ClanRequestsService {
     constructor(
         @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>,
         @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-        private readonly joinRepo: ClanJoinRepository
+        private readonly reqRepo: ClanRequestsRepository
     ) {}
 
     private getMemberRoleKey(clan: ClanDocument, userId: string): string | null {
@@ -62,10 +61,6 @@ export class ClanJoinService {
         await user.save({ session: params.session });
     }
 
-    private otherType(type: ClanJoinRequestType): ClanJoinRequestType {
-        return type === "INVITE" ? "APPLY" : "INVITE";
-    }
-
     // USER -> CLAN
     async applyToClan(params: { actorUserId: string; clanId: string }) {
         const { actorUserId, clanId } = params;
@@ -82,30 +77,28 @@ export class ClanJoinService {
                 if (!user) throw new AppException(404, "USER_NOT_FOUND", "User not found");
                 if (user.clanId) throw new AppException(409, "USER_ALREADY_IN_CLAN", "User already in a clan");
 
-                // van már PENDING?
-                const existing = await this.joinRepo.findPending(clanId, actorUserId);
+                const existing = await this.reqRepo.findPending(clanId, actorUserId);
                 if (existing) {
-                    // ha ugyanaz a type, akkor csak visszaadjuk (idempotens)
                     if (existing.type === "APPLY") {
                         out = { requestId: String(existing._id), status: "PENDING", autoAccepted: false };
                         return;
                     }
-                    // ha ellentétes (INVITE), akkor auto-accept
-                    await this.joinRepo.updateStatus({
+
+                    // existing INVITE -> auto-accept
+                    await this.reqRepo.updateStatus({
                         id: new Types.ObjectId(String(existing._id)),
                         status: "ACCEPTED",
                         decidedByUserId: actorUserId,
                         session,
                     });
 
-                    // beléptetés
                     await this.joinClanTx({ clanId, userId: actorUserId, session });
 
                     out = { requestId: String(existing._id), status: "ACCEPTED", autoAccepted: true };
                     return;
                 }
 
-                const created = await this.joinRepo.createPending({
+                const created = await this.reqRepo.createPending({
                     clanId,
                     userId: actorUserId,
                     type: "APPLY",
@@ -122,7 +115,7 @@ export class ClanJoinService {
         }
     }
 
-    // CLAN -> USER (permission kell)
+    // CLAN -> USER
     async inviteToClan(params: { actorUserId: string; clanId: string; targetUserId: string }) {
         const { actorUserId, clanId, targetUserId } = params;
 
@@ -134,7 +127,6 @@ export class ClanJoinService {
                 const clan = await this.clanModel.findById(clanId).session(session).exec();
                 if (!clan) throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
 
-                // permission: itt most Edit-et kérünk (később csinálhatsz külön Invite perm-et)
                 if (!this.hasPermission(clan, actorUserId, ClanPermissions.Edit)) {
                     throw new AppException(403, "NO_PERMISSION", "No permission");
                 }
@@ -142,7 +134,7 @@ export class ClanJoinService {
                 const target = await this.userModel.findById(targetUserId).session(session).exec();
                 if (!target) throw new AppException(404, "USER_NOT_FOUND", "User not found");
 
-                const existing = await this.joinRepo.findPending(clanId, targetUserId);
+                const existing = await this.reqRepo.findPending(clanId, targetUserId);
                 if (existing) {
                     if (existing.type === "INVITE") {
                         out = { requestId: String(existing._id), status: "PENDING", autoAccepted: false };
@@ -150,7 +142,7 @@ export class ClanJoinService {
                     }
 
                     // existing APPLY -> auto-accept
-                    await this.joinRepo.updateStatus({
+                    await this.reqRepo.updateStatus({
                         id: new Types.ObjectId(String(existing._id)),
                         status: "ACCEPTED",
                         decidedByUserId: actorUserId,
@@ -163,7 +155,7 @@ export class ClanJoinService {
                     return;
                 }
 
-                const created = await this.joinRepo.createPending({
+                const created = await this.reqRepo.createPending({
                     clanId,
                     userId: targetUserId,
                     type: "INVITE",
@@ -181,7 +173,7 @@ export class ClanJoinService {
     }
 
     async listMyRequests(userId: string) {
-        return this.joinRepo.listForUser(userId);
+        return this.reqRepo.listForUser(userId);
     }
 
     async listClanPendingRequests(params: { actorUserId: string; clanId: string }) {
@@ -192,11 +184,11 @@ export class ClanJoinService {
             throw new AppException(403, "NO_PERMISSION", "No permission");
         }
 
-        return this.joinRepo.listPendingForClan(params.clanId);
+        return this.reqRepo.listPendingForClan(params.clanId);
     }
 
     async acceptRequest(params: { actorUserId: string; requestId: string }) {
-        const req = await this.joinRepo.findById(params.requestId);
+        const req = await this.reqRepo.findById(params.requestId);
         if (!req) throw new AppException(404, "REQUEST_NOT_FOUND", "Request not found");
         if (req.status !== "PENDING") throw new AppException(409, "REQUEST_NOT_PENDING", "Request is not pending");
 
@@ -208,17 +200,19 @@ export class ClanJoinService {
                     if (String(req.userId) !== String(params.actorUserId)) {
                         throw new AppException(403, "NOT_OWNER_OF_REQUEST", "Not allowed");
                     }
-                    await this.joinRepo.updateStatus({
+
+                    await this.reqRepo.updateStatus({
                         id: new Types.ObjectId(String(req._id)),
                         status: "ACCEPTED",
                         decidedByUserId: params.actorUserId,
                         session,
                     });
+
                     await this.joinClanTx({ clanId: String(req.clanId), userId: String(req.userId), session });
                     return;
                 }
 
-                // APPLY-t a clan fogadja el (permission)
+                // APPLY-t a clan fogadja el
                 const clan = await this.clanModel.findById(req.clanId).session(session).exec();
                 if (!clan) throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
 
@@ -226,7 +220,7 @@ export class ClanJoinService {
                     throw new AppException(403, "NO_PERMISSION", "No permission");
                 }
 
-                await this.joinRepo.updateStatus({
+                await this.reqRepo.updateStatus({
                     id: new Types.ObjectId(String(req._id)),
                     status: "ACCEPTED",
                     decidedByUserId: params.actorUserId,
@@ -243,20 +237,21 @@ export class ClanJoinService {
     }
 
     async rejectRequest(params: { actorUserId: string; requestId: string }) {
-        const req = await this.joinRepo.findById(params.requestId);
+        const req = await this.reqRepo.findById(params.requestId);
         if (!req) throw new AppException(404, "REQUEST_NOT_FOUND", "Request not found");
         if (req.status !== "PENDING") throw new AppException(409, "REQUEST_NOT_PENDING", "Request is not pending");
 
-        // INVITE-et a user tudja rejectelni; APPLY-t a clan admin/owner
         if (req.type === "INVITE") {
             if (String(req.userId) !== String(params.actorUserId)) {
                 throw new AppException(403, "NOT_OWNER_OF_REQUEST", "Not allowed");
             }
-            await this.joinRepo.updateStatus({
+
+            await this.reqRepo.updateStatus({
                 id: new Types.ObjectId(String(req._id)),
                 status: "REJECTED",
                 decidedByUserId: params.actorUserId,
             });
+
             return { ok: true };
         }
 
@@ -267,7 +262,7 @@ export class ClanJoinService {
             throw new AppException(403, "NO_PERMISSION", "No permission");
         }
 
-        await this.joinRepo.updateStatus({
+        await this.reqRepo.updateStatus({
             id: new Types.ObjectId(String(req._id)),
             status: "REJECTED",
             decidedByUserId: params.actorUserId,
@@ -277,16 +272,15 @@ export class ClanJoinService {
     }
 
     async cancelRequest(params: { actorUserId: string; requestId: string }) {
-        const req = await this.joinRepo.findById(params.requestId);
+        const req = await this.reqRepo.findById(params.requestId);
         if (!req) throw new AppException(404, "REQUEST_NOT_FOUND", "Request not found");
         if (req.status !== "PENDING") throw new AppException(409, "REQUEST_NOT_PENDING", "Request is not pending");
 
-        // CANCEL: csak az tudja, aki létrehozta (apply esetén user, invite esetén a meghívó)
         if (String(req.createdByUserId) !== String(params.actorUserId)) {
             throw new AppException(403, "NOT_OWNER_OF_REQUEST", "Not allowed");
         }
 
-        await this.joinRepo.updateStatus({
+        await this.reqRepo.updateStatus({
             id: new Types.ObjectId(String(req._id)),
             status: "CANCELLED",
             decidedByUserId: params.actorUserId,
