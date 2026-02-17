@@ -1,4 +1,4 @@
-// src/clan/overview/pages/ClanOverviewPage.tsx
+// src/clans/overview/pages/ClanOverviewPage.tsx
 import { useTranslation } from "react-i18next";
 import { ClanCreateCard } from "../components/ClanCreateCard";
 import { ClanEditCard } from "../components/ClanEditCard";

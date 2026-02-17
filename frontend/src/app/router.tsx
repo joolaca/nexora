@@ -8,9 +8,9 @@ import { AppLayout } from "../layouts/AppLayout";
 import { SettingsPage } from "../pages/SettingsPage";
 import { UsersPage } from "../users/components/UsersPage";
 
-import { ClanLayout } from "../clan/ClanLayout";
-import { ClanOverviewPage } from "../clan/overview/pages/ClanOverviewPage";
-import { ClanRequestsPage } from "../clan/requests/components/ClanRequestsPage";
+import { ClanLayout } from "../clans/ClanLayout";
+import { ClanOverviewPage } from "../clans/overview/pages/ClanOverviewPage";
+import { ClanRequestsPage } from "../clans/requests/components/ClanRequestsPage";
 
 export const router = createBrowserRouter([
     {
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
                     { path: "/settings", element: <SettingsPage /> },
 
                     {
-                        path: "/clan",
+                        path: "/clans",
                         element: <ClanLayout />,
                         children: [
                             { index: true, element: <ClanOverviewPage /> },

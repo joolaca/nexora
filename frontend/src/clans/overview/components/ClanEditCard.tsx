@@ -1,4 +1,4 @@
-// src/clan/overview/components/ClanEditCard.tsx
+// src/clans/overview/components/ClanEditCard.tsx
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { translateApiError } from "../../../i18n/translateApiError";
@@ -16,7 +16,7 @@ export function ClanEditCard({ clan }: Props) {
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
 
-    // ✅ Prefill: amikor betölt a clan, töltsük fel a mezőket (de ne írjuk felül, ha user már gépelt)
+    // ✅ Prefill: amikor betölt a clans, töltsük fel a mezőket (de ne írjuk felül, ha user már gépelt)
     useEffect(() => {
         setName((prev) => (prev ? prev : clan.name));
         setSlug((prev) => (prev ? prev : clan.slug));
@@ -42,35 +42,35 @@ export function ClanEditCard({ clan }: Props) {
         });
     };
 
-    const errMsg = edit.isError ? translateApiError(edit.error, t, "clan.editFailed") : "";
+    const errMsg = edit.isError ? translateApiError(edit.error, t, "clans.editFailed") : "";
 
     return (
         <div className="card shadow-sm">
             <div className="card-body">
-                <h3 className="h5 mb-2">{t("clan.editTitle")}</h3>
+                <h3 className="h5 mb-2">{t("clans.editTitle")}</h3>
 
                 <div className="text-muted small mb-3">
-                    {t("clan.inClanAs")} <strong>{clan.name}</strong> ({clan.slug}) — {t("clan.myRole")}:{" "}
+                    {t("clans.inClanAs")} <strong>{clan.name}</strong> ({clan.slug}) — {t("clans.myRole")}:{" "}
                     <strong>{clan.myRole}</strong>
                 </div>
 
                 <form onSubmit={onSubmit}>
                     <div className="mb-3">
-                        <label className="form-label">{t("clan.editName")}</label>
+                        <label className="form-label">{t("clans.editName")}</label>
                         <input className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">{t("clan.editSlug")}</label>
+                        <label className="form-label">{t("clans.editSlug")}</label>
                         <input className="form-control" value={slug} onChange={(e) => setSlug(e.target.value)} />
                     </div>
 
                     {edit.isError && <div className="alert alert-danger py-2">{errMsg}</div>}
 
-                    {edit.isSuccess && <div className="alert alert-success py-2">{t("clan.editSuccess")}</div>}
+                    {edit.isSuccess && <div className="alert alert-success py-2">{t("clans.editSuccess")}</div>}
 
                     <button className="btn btn-outline-primary" type="submit" disabled={!canSubmit}>
-                        {edit.isPending ? t("clan.editSaving") : t("clan.editSave")}
+                        {edit.isPending ? t("clans.editSaving") : t("clans.editSave")}
                     </button>
                 </form>
             </div>

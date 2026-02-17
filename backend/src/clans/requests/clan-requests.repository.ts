@@ -1,4 +1,4 @@
-// backend/src/clans/requests/clan-requests.repository.ts
+// backend/src/clans/requests/clans-requests.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";

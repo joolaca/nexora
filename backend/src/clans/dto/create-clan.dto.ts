@@ -9,7 +9,7 @@ export class CreateClanDto {
     name!: string;
 
     @ApiPropertyOptional({
-        example: "clan-1",
+        example: "clans-1",
         description: "Optional URL-friendly slug. If omitted, it will be generated from the name.",
     })
     @IsOptional()

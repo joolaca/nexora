@@ -1,8 +1,8 @@
 ///src/users/components/UserDetailsPanel.tsx
 import type { UserListItem } from "../usersApi";
 import { useTranslation } from "react-i18next";
-import { useMyClan } from "../../clan/overview/hooks/overview.hooks";
-import { useInviteToClan } from "../../clan/requests/hooks/requests.hooks";
+import { useMyClan } from "../../clans/overview/hooks/overview.hooks";
+import { useInviteToClan } from "../../clans/requests/hooks/requests.hooks";
 
 type Props = {
     user: UserListItem | null;
@@ -41,7 +41,7 @@ export function UserDetailsPanel({ user, isLoading }: Props) {
             </div>
 
             <div className="mb-3">
-                <div className="text-muted small">{tUser("panel.clan")}</div>
+                <div className="text-muted small">{tUser("panel.clans")}</div>
                 {user.clan ? (
                     <div className="fw-semibold">
                         {user.clan.name} <span className="text-muted">({user.clan.slug})</span>

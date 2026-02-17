@@ -25,19 +25,19 @@ export class ClansController {
     constructor(private clans: ClansService) {}
 
     @ApiOperation({
-        summary: "Get my clan",
-        description: "Returns the clan where the current user is a member.",
+        summary: "Get my clans",
+        description: "Returns the clans where the current user is a member.",
     })
-    @ApiOkResponse({ description: "My clan details." })
-    @ApiNotFoundResponse({ description: "Clan not found (user is not in a clan)." })
+    @ApiOkResponse({ description: "My clans details." })
+    @ApiNotFoundResponse({ description: "Clan not found (user is not in a clans)." })
     @Get("me")
     me(@Req() req: any) {
         return this.clans.getMyClan(req.user.userId);
     }
 
     @ApiOperation({
-        summary: "Create clan",
-        description: "Creates a new clan and sets the current user as the owner.",
+        summary: "Create clans",
+        description: "Creates a new clans and sets the current user as the owner.",
     })
     @ApiOkResponse({ description: "Clan created successfully." })
     @ApiBadRequestResponse({ description: "Invalid request body or validation error." })
@@ -48,12 +48,12 @@ export class ClansController {
     }
 
     @ApiOperation({
-        summary: "Update my clan",
-        description: "Updates the current user's clan (requires proper permissions).",
+        summary: "Update my clans",
+        description: "Updates the current user's clans (requires proper permissions).",
     })
     @ApiOkResponse({ description: "Clan updated successfully." })
     @ApiBadRequestResponse({ description: "Nothing to update or validation error." })
-    @ApiForbiddenResponse({ description: "No permission or not a clan member." })
+    @ApiForbiddenResponse({ description: "No permission or not a clans member." })
     @ApiNotFoundResponse({ description: "Clan not found." })
     @ApiConflictResponse({ description: "Slug already taken or invalid slug." })
     @Patch()

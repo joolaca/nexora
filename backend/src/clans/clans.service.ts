@@ -1,5 +1,4 @@
 // backend/src/clans/clans.service.ts
-import {ConflictException, Injectable} from "@nestjs/common";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model, Types} from "mongoose";
 import {Clan, ClanDocument} from "./clan.schema";
@@ -45,7 +44,7 @@ export class ClansService {
 
     async createClan(ownerUserId: string, dto: CreateClanDto) {
         const slug = (dto.slug?.trim().toLowerCase() || slugify(dto.name));
-        if (!slug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {slug});
+        if (!slug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clans slug", {slug});
 
         const exists = await this.clanModel.exists({slug});
         if (exists) throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", {slug});
@@ -82,7 +81,7 @@ export class ClansService {
 
         const member = clan.members.find((m) => String(m.userId) === String(userId));
         if (!member) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
+            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clans member");
         }
 
         if (!this.hasPermission(clan, userId, ClanPermissions.Edit)) {
@@ -95,7 +94,7 @@ export class ClansService {
 
         if (dto.slug) {
             const newSlug = dto.slug.trim().toLowerCase();
-            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {slug: dto.slug});
+            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clans slug", {slug: dto.slug});
 
             if (newSlug !== clan.slug) {
                 const exists = await this.clanModel.exists({slug: newSlug, _id: {$ne: clan._id}});
@@ -124,7 +123,7 @@ export class ClansService {
 
         const myRole = this.getMemberRoleKey(clan, userId);
         if (!myRole) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
+            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clans member");
         }
 
         const role = clan.roles.find((r) => r.key === myRole);

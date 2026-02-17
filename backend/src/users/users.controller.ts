@@ -65,7 +65,7 @@ export class UsersController {
         required: false,
         enum: ["any", "in", "none"],
         example: "any",
-        description: 'Clan filter: "in" = has clan, "none" = no clan, "any" = no filter.',
+        description: 'Clan filter: "in" = has clans, "none" = no clans, "any" = no filter.',
     })
     @Get()
     async list(@Query() q: ListUsersDto) {

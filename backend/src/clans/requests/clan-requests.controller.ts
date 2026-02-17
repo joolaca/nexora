@@ -1,4 +1,4 @@
-// backend/src/clans/requests/clan-requests.controller.ts
+// backend/src/clans/requests/clans-requests.controller.ts
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
 import { ClanRequestsService } from "./clan-requests.service";
@@ -25,28 +25,28 @@ export class ClanRequestsController {
     constructor(private readonly reqs: ClanRequestsService) {}
 
     @ApiOperation({
-        summary: "Apply to a clan",
-        description: "Creates an APPLY request (user -> clan). If an INVITE exists, it may auto-accept.",
+        summary: "Apply to a clans",
+        description: "Creates an APPLY request (user -> clans). If an INVITE exists, it may auto-accept.",
     })
-    @ApiParam({ name: "clanId", description: "Target clan ID (Mongo ObjectId)" })
+    @ApiParam({ name: "clanId", description: "Target clans ID (Mongo ObjectId)" })
     @ApiOkResponse({ description: "Request created or auto-accepted." })
     @ApiNotFoundResponse({ description: "Clan not found." })
-    @ApiConflictResponse({ description: "User already in a clan or request not in valid state." })
+    @ApiConflictResponse({ description: "User already in a clans or request not in valid state." })
     @Post(":clanId/apply")
     apply(@Req() req: any, @Param("clanId") clanId: string) {
         return this.reqs.applyToClan({ actorUserId: req.user.userId, clanId });
     }
 
     @ApiOperation({
-        summary: "Invite a user to a clan",
-        description: "Creates an INVITE request (clan -> user). Requires clan permission.",
+        summary: "Invite a user to a clans",
+        description: "Creates an INVITE request (clans -> user). Requires clans permission.",
     })
-    @ApiParam({ name: "clanId", description: "Target clan ID (Mongo ObjectId)" })
+    @ApiParam({ name: "clanId", description: "Target clans ID (Mongo ObjectId)" })
     @ApiOkResponse({ description: "Invite created or auto-accepted." })
     @ApiBadRequestResponse({ description: "Invalid request body or validation error." })
     @ApiForbiddenResponse({ description: "No permission to invite." })
     @ApiNotFoundResponse({ description: "Clan or user not found." })
-    @ApiConflictResponse({ description: "Target user already in a clan or request not in valid state." })
+    @ApiConflictResponse({ description: "Target user already in a clans or request not in valid state." })
     @Post(":clanId/invite")
     invite(@Req() req: any, @Param("clanId") clanId: string, @Body() dto: InviteToClanDto) {
         return this.reqs.inviteToClan({
@@ -67,11 +67,11 @@ export class ClanRequestsController {
     }
 
     @ApiOperation({
-        summary: "List pending requests for a clan",
-        description: "Lists PENDING requests for a clan (requires clan permission).",
+        summary: "List pending requests for a clans",
+        description: "Lists PENDING requests for a clans (requires clans permission).",
     })
     @ApiParam({ name: "clanId", description: "Clan ID (Mongo ObjectId)" })
-    @ApiOkResponse({ description: "Pending requests for the clan." })
+    @ApiOkResponse({ description: "Pending requests for the clans." })
     @ApiForbiddenResponse({ description: "No permission." })
     @ApiNotFoundResponse({ description: "Clan not found." })
     @Get(":clanId/requests")
@@ -81,13 +81,13 @@ export class ClanRequestsController {
 
     @ApiOperation({
         summary: "Accept a request",
-        description: "Accepts an INVITE (by invited user) or an APPLY (by clan admin/owner).",
+        description: "Accepts an INVITE (by invited user) or an APPLY (by clans admin/owner).",
     })
     @ApiParam({ name: "requestId", description: "Join request ID (Mongo ObjectId)" })
     @ApiOkResponse({ description: "Request accepted." })
     @ApiForbiddenResponse({ description: "Not allowed." })
     @ApiNotFoundResponse({ description: "Request not found." })
-    @ApiConflictResponse({ description: "Request is not pending or user already in a clan." })
+    @ApiConflictResponse({ description: "Request is not pending or user already in a clans." })
     @Post("requests/:requestId/accept")
     accept(@Req() req: any, @Param("requestId") requestId: string) {
         return this.reqs.acceptRequest({ actorUserId: req.user.userId, requestId });
@@ -95,7 +95,7 @@ export class ClanRequestsController {
 
     @ApiOperation({
         summary: "Reject a request",
-        description: "Rejects an INVITE (by invited user) or an APPLY (by clan admin/owner).",
+        description: "Rejects an INVITE (by invited user) or an APPLY (by clans admin/owner).",
     })
     @ApiParam({ name: "requestId", description: "Join request ID (Mongo ObjectId)" })
     @ApiOkResponse({ description: "Request rejected." })

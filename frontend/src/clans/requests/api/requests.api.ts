@@ -1,4 +1,4 @@
-// src/clan/requests/api/requests.api.ts
+// src/clans/requests/api/requests.api.ts
 import { apiFetch } from "../../../api/http";
 import type { ClanRequestListItem } from "./requests.types";
 

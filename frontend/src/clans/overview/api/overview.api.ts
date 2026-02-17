@@ -1,4 +1,4 @@
-// src/clan/overview/api/overview.api.ts
+// src/clans/overview/api/overview.api.ts
 import { apiFetch } from "../../../api/http";
 import type { ClanCreateRequest, ClanCreateResponse, ClanEditRequest, ClanEditResponse, ClanMeResponse } from "./overview.types";
 

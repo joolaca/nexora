@@ -1,4 +1,4 @@
-// backend/src/clans/requests/clan-requests.service.ts
+// backend/src/clans/requests/clans-requests.service.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -37,7 +37,7 @@ export class ClanRequestsService {
 
         const user = await this.userModel.findById(userIdObj).session(params.session).exec();
         if (!user) throw new AppException(404, "USER_NOT_FOUND", "User not found");
-        if (user.clanId) throw new AppException(409, "USER_ALREADY_IN_CLAN", "User already in a clan");
+        if (user.clanId) throw new AppException(409, "USER_ALREADY_IN_CLAN", "User already in a clans");
 
         const clan = await this.clanModel.findById(clanIdObj).session(params.session).exec();
         if (!clan) throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
@@ -75,7 +75,7 @@ export class ClanRequestsService {
 
                 const user = await this.userModel.findById(actorUserId).session(session).exec();
                 if (!user) throw new AppException(404, "USER_NOT_FOUND", "User not found");
-                if (user.clanId) throw new AppException(409, "USER_ALREADY_IN_CLAN", "User already in a clan");
+                if (user.clanId) throw new AppException(409, "USER_ALREADY_IN_CLAN", "User already in a clans");
 
                 const existing = await this.reqRepo.findPending(clanId, actorUserId);
                 if (existing) {
@@ -212,7 +212,7 @@ export class ClanRequestsService {
                     return;
                 }
 
-                // APPLY-t a clan fogadja el
+                // APPLY-t a clans fogadja el
                 const clan = await this.clanModel.findById(req.clanId).session(session).exec();
                 if (!clan) throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
 

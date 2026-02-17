@@ -22,5 +22,6 @@ Thumbs.db
 
 docker-data/
 /backend/scripts/
+/frontend/scripts/
 
 bash_commands.txt

@@ -1,4 +1,4 @@
-// src/clan/ClanLayout.tsx
+// src/clans/ClanLayout.tsx
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 

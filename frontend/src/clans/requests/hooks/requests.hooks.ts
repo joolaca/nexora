@@ -1,4 +1,4 @@
-// src/clan/requests/hooks/requests.hooks.ts
+// src/clans/requests/hooks/requests.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptClanRequestApi, cancelClanRequestApi, myClanRequestsApi, rejectClanRequestApi } from "../api/requests.api";
 import { inviteToClanApi } from "../api/invites.api";
@@ -60,7 +60,7 @@ export function useInviteToClan() {
     return useMutation({
         mutationFn: inviteToClanApi,
         onSuccess: async (_data, vars) => {
-            // később: ha lesz pending clan lista, ez jól jön
+            // később: ha lesz pending clans lista, ez jól jön
             await qc.invalidateQueries({ queryKey: clanRequestKeys.me });
             await qc.invalidateQueries({ queryKey: clanRequestKeys.clanPending(vars.clanId) });
         },

@@ -1,4 +1,4 @@
-// src/clan/requests/components/ClanRequestsPage.tsx
+// src/clans/requests/components/ClanRequestsPage.tsx
 import { useTranslation } from "react-i18next";
 import { useAcceptClanRequest, useMyClanRequests, useRejectClanRequest } from "../hooks/requests.hooks";
 import type { ClanRequestListItem } from "../api/requests.types";

@@ -1,4 +1,4 @@
-// backend/src/clans/clan.schema.ts
+// backend/src/clans/clans.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 

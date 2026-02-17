@@ -43,7 +43,7 @@ export class ListUsersDto {
 
     @ApiPropertyOptional({
         example: "any",
-        description: 'Clan filter: "in" = has clan, "none" = no clan, "any" = no filter.',
+        description: 'Clan filter: "in" = has clans, "none" = no clans, "any" = no filter.',
         enum: ["any", "in", "none"],
     })
     @IsOptional()

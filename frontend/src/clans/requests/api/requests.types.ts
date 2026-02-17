@@ -1,4 +1,4 @@
-// src/clan/requests/api/requests.types.ts
+// src/clans/requests/api/requests.types.ts
 
 export type ClanRequestType = "INVITE" | "APPLY";
 
@@ -13,7 +13,7 @@ export type ClanRequestListItem = {
     createdAt: string;
 };
 
-// INVITE (clan -> user)
+// INVITE (clans -> user)
 export type ClanInviteRequest = {
     userId: string;
 };

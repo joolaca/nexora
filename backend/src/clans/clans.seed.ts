@@ -22,9 +22,9 @@ export async function seedClans(params: {
     const { clanModel } = params;
 
     const defs = [
-        { name: "Clan 1", slug: "clan-1" },
-        { name: "Clan 2", slug: "clan-2" },
-        { name: "Clan 3", slug: "clan-3" },
+        { name: "Clan 1", slug: "clans-1" },
+        { name: "Clan 2", slug: "clans-2" },
+        { name: "Clan 3", slug: "clans-3" },
     ] as const;
 
     for (const d of defs) {
@@ -42,9 +42,9 @@ export async function seedClans(params: {
     const bySlug = new Map(clans.map((c) => [c.slug, c]));
 
     return {
-        clan1: bySlug.get("clan-1")!,
-        clan2: bySlug.get("clan-2")!,
-        clan3: bySlug.get("clan-3")!,
+        clan1: bySlug.get("clans-1")!,
+        clan2: bySlug.get("clans-2")!,
+        clan3: bySlug.get("clans-3")!,
     };
 }
 

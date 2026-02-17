@@ -52,7 +52,7 @@ export function AppLayout() {
                             </li>
                             <li className="nav-item">
                                 <NavLink className={navLinkClass} to="/clan">
-                                    {t("nav.clan")}
+                                    {t("nav.clans")}
                                 </NavLink>
                             </li>
                         </ul>

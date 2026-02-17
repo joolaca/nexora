@@ -18,7 +18,7 @@ export function UsersTable({ users, onSelect }: Props) {
                     <tr>
                         <th style={{ width: 80 }}>{t("table.rank")}</th>
                         <th>{t("table.username")}</th>
-                        <th style={{ width: 220 }}>{t("table.clan")}</th>
+                        <th style={{ width: 220 }}>{t("table.clans")}</th>
                         <th style={{ width: 120 }}>{t("table.actions")}</th>
                     </tr>
                     </thead>

@@ -93,9 +93,9 @@ export function UsersToolbar({
                     />
                 </div>
 
-                {/* clan */}
+                {/* clans */}
                 <div style={{ width: 160 }}>
-                    <label className="form-label small mb-1">{tc("toolbar.clan")}</label>
+                    <label className="form-label small mb-1">{tc("toolbar.clans")}</label>
                     <select
                         className="form-select form-select-sm"
                         value={clan}

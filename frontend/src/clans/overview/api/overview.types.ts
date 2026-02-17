@@ -1,4 +1,4 @@
-// src/clan/overview/api/overview.types.ts
+// src/clans/overview/api/overview.types.ts
 
 export type ClanCreateRequest = {
     name: string;
