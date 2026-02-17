@@ -1,4 +1,4 @@
-// backend/src/clans/clans.schema.ts
+// backend/src/clans/clan.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 
@@ -10,6 +10,7 @@ export class ClanRole {
     @Prop({ required: true }) name!: string;
     @Prop({ type: [String], default: [] }) permissions!: string[];
 }
+
 export const ClanRoleSchema = SchemaFactory.createForClass(ClanRole);
 
 @Schema({ _id: false })
@@ -18,6 +19,7 @@ export class ClanMember {
     @Prop({ required: true }) roleKey!: string;
     @Prop({ type: Date, default: Date.now }) joinedAt!: Date;
 }
+
 export const ClanMemberSchema = SchemaFactory.createForClass(ClanMember);
 
 @Schema({ timestamps: true, versionKey: false })

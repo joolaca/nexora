@@ -1,19 +1,19 @@
-// backend/src/clans/requests/clans-requests.repository.ts
+// backend/src/clans/join/clan-join.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import {
-    ClanJoinRequest,
-    ClanJoinRequestDocument,
-    ClanJoinRequestStatus,
-    ClanJoinRequestType,
-} from "./clan-join-request.schema";
+    ClanRequest,
+    ClanRequestDocument,
+    ClanRequestStatus,
+    ClanRequestType,
+} from "./clan-request.schema";
 
 @Injectable()
-export class ClanRequestsRepository {
+export class ClanJoinRepository {
     constructor(
-        @InjectModel(ClanJoinRequest.name)
-        private readonly reqModel: Model<ClanJoinRequestDocument>
+        @InjectModel(ClanRequest.name)
+        private readonly reqModel: Model<ClanRequestDocument>
     ) {}
 
     findById(id: string) {
@@ -21,19 +21,17 @@ export class ClanRequestsRepository {
     }
 
     async findPending(clanId: string, userId: string) {
-        return this.reqModel
-            .findOne({
-                clanId: new Types.ObjectId(clanId),
-                userId: new Types.ObjectId(userId),
-                status: "PENDING",
-            })
-            .exec();
+        return this.reqModel.findOne({
+            clanId: new Types.ObjectId(clanId),
+            userId: new Types.ObjectId(userId),
+            status: "PENDING",
+        }).exec();
     }
 
     async createPending(params: {
         clanId: string;
         userId: string;
-        type: ClanJoinRequestType;
+        type: ClanRequestType;
         createdByUserId: string;
         session?: any;
     }) {
@@ -57,7 +55,7 @@ export class ClanRequestsRepository {
 
     async updateStatus(params: {
         id: Types.ObjectId;
-        status: ClanJoinRequestStatus;
+        status: ClanRequestStatus;
         decidedByUserId: string;
         session?: any;
     }) {

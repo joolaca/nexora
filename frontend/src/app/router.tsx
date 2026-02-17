@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
                     { path: "/settings", element: <SettingsPage /> },
 
                     {
-                        path: "/clans",
+                        path: "/clan",
                         element: <ClanLayout />,
                         children: [
                             { index: true, element: <ClanOverviewPage /> },

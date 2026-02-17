@@ -1,13 +1,14 @@
 // backend/src/clans/clans.service.ts
+import { Injectable} from "@nestjs/common";
 import {InjectModel} from "@nestjs/mongoose";
 import {Model, Types} from "mongoose";
-import {Clan, ClanDocument} from "./clan.schema";
+import {Clan, ClanDocument} from "../core/clans.schema";
 import {CreateClanDto} from "./dto/create-clan.dto";
 import {EditClanDto} from "./dto/edit-clan.dto";
-import {ClanPermissions} from "./permissions";
-import {AppException} from "../common/errors/app-exception"
-import {BaseRoles} from "./clans.roles.constants";
-import {ClansRepository} from "./clans.repository";
+import {ClanPermissions} from "../roles/clan-roles.permissions";
+import {AppException} from "../../common/errors/app-exception"
+import {BaseRoles} from "../roles/clan-roles.constants";
+import {ClansRepository} from "./clan-overview.repository";
 
 
 function slugify(input: string) {
@@ -44,7 +45,7 @@ export class ClansService {
 
     async createClan(ownerUserId: string, dto: CreateClanDto) {
         const slug = (dto.slug?.trim().toLowerCase() || slugify(dto.name));
-        if (!slug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clans slug", {slug});
+        if (!slug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {slug});
 
         const exists = await this.clanModel.exists({slug});
         if (exists) throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", {slug});
@@ -81,7 +82,7 @@ export class ClansService {
 
         const member = clan.members.find((m) => String(m.userId) === String(userId));
         if (!member) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clans member");
+            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
         }
 
         if (!this.hasPermission(clan, userId, ClanPermissions.Edit)) {
@@ -94,7 +95,7 @@ export class ClansService {
 
         if (dto.slug) {
             const newSlug = dto.slug.trim().toLowerCase();
-            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clans slug", {slug: dto.slug});
+            if (!newSlug) throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {slug: dto.slug});
 
             if (newSlug !== clan.slug) {
                 const exists = await this.clanModel.exists({slug: newSlug, _id: {$ne: clan._id}});
@@ -123,7 +124,7 @@ export class ClansService {
 
         const myRole = this.getMemberRoleKey(clan, userId);
         if (!myRole) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clans member");
+            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
         }
 
         const role = clan.roles.find((r) => r.key === myRole);

@@ -1,33 +1,30 @@
 // backend/src/clans/clans.module.ts
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { Clan, ClanSchema } from "./core/clans.schema";
+import { ClansController } from "./overview/clan-overview.controller";
+import { ClansService } from "./overview/clan-overview.service";
+import { ClansRepository } from "./overview/clan-overview.repository";
 
-import { Clan, ClanSchema } from "./clan.schema";
-import { ClansRepository } from "./clans.repository";
-import { ClansService } from "./clans.service";
+// ✅ join feature
+import { ClanJoinController } from "./requests/clan-requests.controller";
+import { ClanJoinService } from "./requests/clan-requests.service";
+import { ClanJoinRepository } from "./requests/clan-requests.repository";
+import { ClanRequest, ClanRequestSchema } from "./requests/clan-request.schema";
 
-// ✅ overview domain
-import { ClansController } from "./overview/clans.controller";
-
-// ✅ requests domain (régi join)
-import { ClanRequestsController } from "./requests/clan-requests.controller";
-import { ClanRequestsService } from "./requests/clan-requests.service";
-import { ClanRequestsRepository } from "./requests/clan-requests.repository";
-import { ClanJoinRequest, ClanJoinRequestSchema } from "./requests/clan-join-request.schema";
-
-// ✅ user model kell a requests-hez
+// ✅ user model (joinhoz kell)
 import { User, UserSchema } from "../users/user.schema";
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: Clan.name, schema: ClanSchema },
-            { name: ClanJoinRequest.name, schema: ClanJoinRequestSchema },
+            { name: ClanRequest.name, schema: ClanRequestSchema },
             { name: User.name, schema: UserSchema },
         ]),
     ],
-    controllers: [ClansController, ClanRequestsController],
-    providers: [ClansService, ClansRepository, ClanRequestsService, ClanRequestsRepository],
+    controllers: [ClansController, ClanJoinController],
+    providers: [ClansService, ClansRepository, ClanJoinService, ClanJoinRepository],
     exports: [ClansService],
 })
 export class ClansModule {}

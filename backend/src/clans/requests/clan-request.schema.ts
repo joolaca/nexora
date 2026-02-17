@@ -1,18 +1,14 @@
-// backend/src/clans/requests/clans-join-request.schema.ts
+// backend/src/clans/join/clan-join-request.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 
-export type ClanJoinRequestDocument = HydratedDocument<ClanJoinRequest>;
+export type ClanRequestDocument = HydratedDocument<ClanRequest>;
 
-export type ClanJoinRequestType = "INVITE" | "APPLY";
-export type ClanJoinRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
+export type ClanRequestType = "INVITE" | "APPLY";
+export type ClanRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED";
 
-@Schema({
-    timestamps: true,
-    versionKey: false,
-    collection: "clan_join_requests",
-})
-export class ClanJoinRequest {
+@Schema({ timestamps: true, versionKey: false, collection: "clan_requests" })
+export class ClanRequest {
     @Prop({ type: Types.ObjectId, required: true, index: true })
     clanId!: Types.ObjectId;
 
@@ -20,15 +16,10 @@ export class ClanJoinRequest {
     userId!: Types.ObjectId;
 
     @Prop({ required: true, enum: ["INVITE", "APPLY"], index: true })
-    type!: ClanJoinRequestType;
+    type!: ClanRequestType;
 
-    @Prop({
-        required: true,
-        enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED"],
-        default: "PENDING",
-        index: true,
-    })
-    status!: ClanJoinRequestStatus;
+    @Prop({ required: true, enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED"], default: "PENDING", index: true })
+    status!: ClanRequestStatus;
 
     @Prop({ type: Types.ObjectId, required: true })
     createdByUserId!: Types.ObjectId;
@@ -40,9 +31,9 @@ export class ClanJoinRequest {
     decidedAt!: Date | null;
 }
 
-export const ClanJoinRequestSchema = SchemaFactory.createForClass(ClanJoinRequest);
+export const ClanRequestSchema = SchemaFactory.createForClass(ClanRequest);
 
-ClanJoinRequestSchema.index(
+ClanRequestSchema.index(
     { clanId: 1, userId: 1 },
     { unique: true, partialFilterExpression: { status: "PENDING" } }
 );

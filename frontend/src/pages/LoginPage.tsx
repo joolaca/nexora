@@ -1,15 +1,24 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useLogin } from "../auth/authHooks";
 import { Navigate } from "react-router-dom";
 import { getToken } from "../auth/tokenStorage";
 import { useTranslation } from "react-i18next";
 import { translateApiError } from "../i18n/translateApiError";
 
+const AUTH_FLASH_KEY = "auth_error_flash";
+
 export function LoginPage() {
     const { t } = useTranslation();
     const [username, setUsername] = useState("user11");
     const [password, setPassword] = useState("123");
     const login = useLogin();
+
+    // ✅ egyszer kiolvassuk (hogy ne maradjon bent)
+    const flashError = useMemo(() => {
+        const msg = sessionStorage.getItem(AUTH_FLASH_KEY);
+        if (msg) sessionStorage.removeItem(AUTH_FLASH_KEY);
+        return msg || "";
+    }, []);
 
     if (getToken()) return <Navigate to="/" replace />;
 
@@ -19,6 +28,7 @@ export function LoginPage() {
     };
 
     const errorMsg = login.isError ? translateApiError(login.error, t, "login.failed") : "";
+    const visibleError = errorMsg || flashError;
 
     return (
         <div className="card shadow-sm">
@@ -41,7 +51,7 @@ export function LoginPage() {
                         />
                     </div>
 
-                    {login.isError && <div className="alert alert-danger py-2">{errorMsg}</div>}
+                    {!!visibleError && <div className="alert alert-danger py-2">{visibleError}</div>}
 
                     <button className="btn btn-primary w-100" type="submit" disabled={login.isPending}>
                         {login.isPending ? t("login.pending") : t("login.submit")}

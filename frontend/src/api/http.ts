@@ -1,16 +1,12 @@
 import { ApiError, ApiFailure, ApiSuccess } from "./types";
 import { getToken, clearToken } from "../auth/tokenStorage";
 
-// Docker/Vite proxy miatt alapból relatív URL-eket használunk (/auth/...)
-// Ha később prod buildnél kell base URL, ide jöhet VITE_API_BASE_URL.
 const API_BASE = "";
-
 type FetchOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
     const headers = new Headers(options.headers);
 
-    // csak akkor állítsuk, ha body is van
     if (options.body !== undefined && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
     }
@@ -36,20 +32,34 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
         return ok.data;
     }
 
-    const fail = payload as ApiFailure;
-    const msg =
-        (fail?.error?.message && Array.isArray(fail.error.message) ? fail.error.message.join(", ") : fail?.error?.message) ||
-        "Request failed";
+    if (isJson) {
+        const fail = payload as ApiFailure;
 
-    const isInvalidToken =
-        res.status === 401 ||
-        (res.status === 409 && fail?.error?.code === "INVALID_TOKEN");
+        const msg =
+            (fail?.error?.message && Array.isArray(fail.error.message)
+                ? fail.error.message.join(", ")
+                : fail?.error?.message) || "Request failed";
 
-    console.log(`--🔍--!! res.status ` , res.status );
+        const isInvalidToken =
+            res.status === 401 ||
+            (res.status === 409 && fail?.error?.code === "INVALID_TOKEN");
 
-    if (isInvalidToken) {
-        clearToken();
+        if (isInvalidToken) clearToken();
+
+        throw new ApiError(String(msg), res.status, fail);
     }
 
-    throw new ApiError(String(msg), res.status, fail);
+    const rawText = typeof payload === "string" ? payload : String(payload);
+
+    if (res.status === 401) clearToken();
+
+    throw new ApiError(rawText || "Request failed", res.status, {
+        data: null,
+        error: {
+            statusCode: res.status,
+            message: rawText || "Request failed",
+            code: "NON_JSON_ERROR",
+        },
+        meta: {},
+    });
 }

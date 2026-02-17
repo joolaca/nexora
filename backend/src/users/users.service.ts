@@ -4,7 +4,7 @@ import * as bcrypt from "bcryptjs";
 import { UpdateMeDto } from "./dto/update-me.dto";
 import { UsersRepository } from "./users.repository";
 import { UsersListRepository, type UsersClanFilter, type UsersSortKey } from "./users.list.repository";
-import { ClansService } from "../clans/clans.service";
+import { ClansService } from "../clans/overview/clan-overview.service";
 
 @Injectable()
 export class UsersService {

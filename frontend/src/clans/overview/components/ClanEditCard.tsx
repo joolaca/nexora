@@ -42,35 +42,35 @@ export function ClanEditCard({ clan }: Props) {
         });
     };
 
-    const errMsg = edit.isError ? translateApiError(edit.error, t, "clans.editFailed") : "";
+    const errMsg = edit.isError ? translateApiError(edit.error, t, "clan.editFailed") : "";
 
     return (
         <div className="card shadow-sm">
             <div className="card-body">
-                <h3 className="h5 mb-2">{t("clans.editTitle")}</h3>
+                <h3 className="h5 mb-2">{t("clan.editTitle")}</h3>
 
                 <div className="text-muted small mb-3">
-                    {t("clans.inClanAs")} <strong>{clan.name}</strong> ({clan.slug}) — {t("clans.myRole")}:{" "}
+                    {t("clan.inClanAs")} <strong>{clan.name}</strong> ({clan.slug}) — {t("clan.myRole")}:{" "}
                     <strong>{clan.myRole}</strong>
                 </div>
 
                 <form onSubmit={onSubmit}>
                     <div className="mb-3">
-                        <label className="form-label">{t("clans.editName")}</label>
+                        <label className="form-label">{t("clan.editName")}</label>
                         <input className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">{t("clans.editSlug")}</label>
+                        <label className="form-label">{t("clan.editSlug")}</label>
                         <input className="form-control" value={slug} onChange={(e) => setSlug(e.target.value)} />
                     </div>
 
                     {edit.isError && <div className="alert alert-danger py-2">{errMsg}</div>}
 
-                    {edit.isSuccess && <div className="alert alert-success py-2">{t("clans.editSuccess")}</div>}
+                    {edit.isSuccess && <div className="alert alert-success py-2">{t("clan.editSuccess")}</div>}
 
                     <button className="btn btn-outline-primary" type="submit" disabled={!canSubmit}>
-                        {edit.isPending ? t("clans.editSaving") : t("clans.editSave")}
+                        {edit.isPending ? t("clan.editSaving") : t("clan.editSave")}
                     </button>
                 </form>
             </div>

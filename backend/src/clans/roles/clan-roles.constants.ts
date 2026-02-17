@@ -1,4 +1,4 @@
-import {ClanPermissions} from "./permissions";
+import {ClanPermissions} from "./clan-roles.permissions";
 
 export const BaseRoles = [
     {
