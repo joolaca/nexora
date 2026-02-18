@@ -37,6 +37,11 @@ export class ClanRequestController {
         return this.requests.listClanPendingRequests({ actorUserId: req.user.userId, clanId });
     }
 
+    @Get("get-invite-request-list")
+    getInviteRequestsList(@Req() req: any) {
+        return this.requests.getInviteRequestsList({actorUserId: req.user.userId,});
+    }
+
     // accept / reject / cancel (egységes)
     @Post("requests/:requestId/accept")
     accept(@Req() req: any, @Param("requestId") requestId: string) {

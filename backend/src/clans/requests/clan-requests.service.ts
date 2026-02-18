@@ -6,13 +6,17 @@ import { User, UserDocument } from "../../users/user.schema";
 import { ClanPermissions } from "../roles/clan-roles.permissions";
 import { AppException } from "../../common/errors/app-exception";
 import { ClanRequestRepository } from "./clan-requests.repository";
+import { UsersRepository } from "../../users/users.repository";
+import { ClansRepository } from "../overview/clan-overview.repository";
 
 @Injectable()
 export class ClanRequestService {
     constructor(
         @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>,
         @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-        private readonly reqRepo: ClanRequestRepository
+        private readonly reqRepo: ClanRequestRepository,
+        private readonly usersRepo: UsersRepository,
+        private readonly clansOverviewRepo: ClansRepository,
     ) {}
 
     private getMemberRoleKey(clan: ClanDocument, userId: string): string | null {
@@ -284,4 +288,35 @@ export class ClanRequestService {
 
         return { ok: true };
     }
+
+    async getInviteRequestsList(params: { actorUserId: string }) {
+        // 1️⃣ Actor user betöltése
+        const actor = await this.usersRepo.findById(params.actorUserId);
+        if (!actor) {
+            throw new AppException(404, "USER_NOT_FOUND", "User not found");
+        }
+
+        if (!actor.clanId) {
+            throw new AppException(
+                409,
+                "USER_NOT_IN_CLAN",
+                "User is not in a clan"
+            );
+        }
+
+        // 2️⃣ Clan betöltése
+        const clan = await this.clansOverviewRepo.findById(String(actor.clanId));
+        if (!clan) {
+            throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
+        }
+
+        // 3️⃣ Permission check
+        if (!this.hasPermission(clan, params.actorUserId, ClanPermissions.Edit)) {
+            throw new AppException( 403, "NO_PERMISSION", "No permission to view invites" );
+        }
+
+        // 4️⃣ Invite requestek lekérése
+        return this.reqRepo.listPendingInvitesForClan(String(actor.clanId));
+    }
+
 }

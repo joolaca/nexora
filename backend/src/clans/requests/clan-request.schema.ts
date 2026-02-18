@@ -1,4 +1,4 @@
-// backend/src/clans/join/clan-join-request.schema.ts
+// backend/src/clans/join/clan-request.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 

@@ -1,4 +1,4 @@
-// backend/src/clans/clans.repository.ts
+// backend/src/clans/overview/clan-overview.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -22,4 +22,9 @@ export class ClansRepository {
             .lean()
             .exec();
     }
+
+    async findById(clanId: string) {
+        return this.clanModel.findById(clanId).exec();
+    }
+
 }

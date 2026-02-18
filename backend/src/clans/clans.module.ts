@@ -10,8 +10,8 @@ import { ClanRequestController } from "./requests/clan-requests.controller";
 import { ClanRequestService } from "./requests/clan-requests.service";
 import { ClanRequestRepository } from "./requests/clan-requests.repository";
 import { ClanRequest, ClanRequestSchema } from "./requests/clan-request.schema";
-
 import { User, UserSchema } from "../users/user.schema";
+import {UsersRepository} from "../users/users.repository";
 
 @Module({
     imports: [
@@ -27,6 +27,8 @@ import { User, UserSchema } from "../users/user.schema";
         ClansRepository,
         ClanRequestService,
         ClanRequestRepository,
+        UsersRepository
+
     ],
     exports: [ClansService, ClanRequestService],
 })

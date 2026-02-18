@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { ClanRequest, ClanRequestDocument, ClanRequestStatus, ClanRequestType } from "./clan-request.schema";
 
+
 @Injectable()
 export class ClanRequestRepository {
     constructor(
@@ -81,4 +82,28 @@ export class ClanRequestRepository {
             .lean()
             .exec();
     }
+
+
+    async listPendingInvitesForClan(clanId: string) {
+        return this.reqModel
+            .find(
+                {
+                    clanId: new Types.ObjectId(clanId),
+                    type: "INVITE",
+                    status: "PENDING",
+                },
+                {
+                    clanId: 1,
+                    userId: 1,
+                    type: 1,
+                    status: 1,
+                    createdByUserId: 1,
+                    createdAt: 1,
+                }
+            )
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+    }
+
 }

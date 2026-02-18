@@ -5,6 +5,7 @@ import { UpdateMeDto } from "./dto/update-me.dto";
 import { UsersRepository } from "./users.repository";
 import { UsersListRepository, type UsersClanFilter, type UsersSortKey } from "./users.list.repository";
 import { ClansService } from "../clans/overview/clan-overview.service";
+import {AppException} from "../common/errors/app-exception";
 
 @Injectable()
 export class UsersService {
@@ -19,10 +20,18 @@ export class UsersService {
         return this.usersRepo.findByUsername(username);
     }
 
-    // Used by AuthService
     findById(id: string) {
         return this.usersRepo.findById(id);
     }
+
+    getById(id:string){
+        const user = this.usersRepo.findById(id);
+        if(!user){
+            throw new AppException(404, "USER_NOT_FOUND", "User not found", {userId:id});
+        }
+        return user;
+    }
+
 
     async seedTestUsers(count = 50, plainPassword = "123") {
         const passwordHash = await bcrypt.hash(plainPassword, 10);
