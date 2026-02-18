@@ -7,7 +7,7 @@ import { SeedService } from "./seed.service";
 import { envValidationSchema } from "../config/env.validation";
 import { ClansModule } from "../clans/clans.module";
 import { Clan, ClanSchema } from "../clans/clan.schema";
-import { User, UserSchema } from "../users/user.schema";
+import { User, UsersSchema } from "../users/users.schema";
 
 @Module({
     imports: [
@@ -23,7 +23,7 @@ import { User, UserSchema } from "../users/user.schema";
             }),
         }),
         MongooseModule.forFeature([
-            { name: User.name, schema: UserSchema },
+            { name: User.name, schema: UsersSchema },
             { name: Clan.name, schema: ClanSchema },
         ]),
         UsersModule,

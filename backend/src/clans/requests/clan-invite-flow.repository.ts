@@ -3,7 +3,7 @@ import { InjectConnection } from "@nestjs/mongoose";
 import { Connection, Types } from "mongoose";
 import { ClanRequestRepository } from "./clan-requests.repository";
 import { UsersRepository } from "../../users/users.repository";
-import { ClansRepository } from "../overview/clan-overview.repository";
+import { ClansRepository } from "../clans.repository";
 import { AppException } from "../../common/errors/app-exception";
 
 @Injectable()

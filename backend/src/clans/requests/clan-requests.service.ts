@@ -1,11 +1,10 @@
 //backend/src/clans/requests/clan-requests.service.ts
 import { Injectable } from "@nestjs/common";
-import { Types } from "mongoose";
 import { ClanPermissions } from "../roles/clan-roles.permissions";
 import { AppException } from "../../common/errors/app-exception";
 import { ClanRequestRepository } from "./clan-requests.repository";
 import { UsersRepository } from "../../users/users.repository";
-import { ClansRepository } from "../overview/clan-overview.repository";
+import { ClansRepository } from "../clans.repository";
 import {ClanInviteFlowRepository} from "./clan-invite-flow.repository"
 
 @Injectable()
