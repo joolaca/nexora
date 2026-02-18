@@ -1,5 +1,5 @@
 // backend/src/clans/requests/clan-requests.controller.ts
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get,  Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
 import { ClanRequestService } from "./clan-requests.service";
 import { InviteToClanDto } from "./dto/invite.dto";
@@ -11,11 +11,10 @@ export class ClanRequestController {
 
 
     // CLAN -> USER invite
-    @Post(":clanId/invite")
-    invite(@Req() req: any, @Param("clanId") clanId: string, @Body() dto: InviteToClanDto) {
+    @Post("invite")
+    invite(@Req() req: any, @Body() dto: InviteToClanDto) {
         return this.requests.inviteToClan({
             actorUserId: req.user.userId,
-            clanId,
             targetUserId: dto.userId,
         });
     }

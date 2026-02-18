@@ -32,12 +32,19 @@ export class ClanRequestService {
 
         return role.permissions.includes(perm);
     }
-    async inviteToClan(params: {
-        actorUserId: string;
-        clanId: string;
-        targetUserId: string;
-    }) {
-        const clan = await this.clansRepo.findById(params.clanId);
+    async inviteToClan(params: { actorUserId: string; targetUserId: string }) {
+        const actorUser = await this.usersRepo.findById(params.actorUserId);
+        if (!actorUser) {
+            throw new AppException(404, "USER_NOT_FOUND", "User not found");
+        }
+
+        if (!actorUser.clanId) {
+            throw new AppException(409, "USER_NOT_IN_CLAN", "User is not in a clan");
+        }
+
+        const clanId = String(actorUser.clanId);
+
+        const clan = await this.clansRepo.findById(clanId);
         if (!clan) {
             throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
         }
@@ -46,8 +53,13 @@ export class ClanRequestService {
             throw new AppException(403, "NO_PERMISSION", "No permission");
         }
 
-        return this.inviteFlowRepo.inviteToClanTx(params);
+        return this.inviteFlowRepo.inviteToClanTx({
+            actorUserId: params.actorUserId,
+            clanId,
+            targetUserId: params.targetUserId,
+        });
     }
+
 
 
 
