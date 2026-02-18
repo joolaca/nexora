@@ -8,8 +8,8 @@ import {EditClanDto} from "./dto/edit-clan.dto";
 import {ClanPermissions} from "../roles/clan-roles.permissions";
 import {AppException} from "../../common/errors/app-exception"
 import {BaseRoles} from "../roles/clan-roles.constants";
-import {ClansRepository} from "./clan-overview.repository";
-
+import {ClansRepository} from "../clans.repository";
+import {ClansOverviewRepository} from "./clan-overview.repository"
 
 function slugify(input: string) {
     return input
@@ -24,7 +24,8 @@ function slugify(input: string) {
 export class ClansService {
     constructor(
         @InjectModel(Clan.name) private clanModel: Model<ClanDocument>,
-        private readonly clansRepo: ClansRepository
+        private readonly clansRepo: ClansRepository,
+        private readonly clansOverviewRepo: ClansOverviewRepository,
     ) {}
 
 
@@ -140,7 +141,7 @@ export class ClansService {
     }
 
     async getSummariesByIds(ids: string[]) {
-        const clans = await this.clansRepo.findByIds(ids);
+        const clans = await this.clansOverviewRepo.findByIds(ids);
 
         const map = new Map<string, { id: string; name: string; slug: string }>();
 

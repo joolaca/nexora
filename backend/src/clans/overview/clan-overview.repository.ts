@@ -5,7 +5,7 @@ import { Model, Types } from "mongoose";
 import { Clan, ClanDocument } from "../core/clans.schema";
 
 @Injectable()
-export class ClansRepository {
+export class ClansOverviewRepository {
     constructor(
         @InjectModel(Clan.name)
         private readonly clanModel: Model<ClanDocument>
@@ -23,8 +23,5 @@ export class ClansRepository {
             .exec();
     }
 
-    async findById(clanId: string) {
-        return this.clanModel.findById(clanId).exec();
-    }
 
 }

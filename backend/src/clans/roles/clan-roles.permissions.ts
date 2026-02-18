@@ -5,6 +5,7 @@ export const ClanPermissions = {
     WallModerate: "clan.wall.moderate",
     RolesManage: "clan.roles.manage",
     MembersKick: "clan.members.kick",
+    RequestsManage: "clan.requests.manage",
 } as const;
 
 export type ClanPermission = (typeof ClanPermissions)[keyof typeof ClanPermissions];

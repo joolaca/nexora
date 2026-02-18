@@ -10,6 +10,7 @@ export const BaseRoles = [
             ClanPermissions.WallModerate,
             ClanPermissions.RolesManage,
             ClanPermissions.MembersKick,
+            ClanPermissions.RequestsManage,
         ],
     },
     {
@@ -19,6 +20,7 @@ export const BaseRoles = [
             ClanPermissions.Edit,
             ClanPermissions.WallWrite,
             ClanPermissions.WallModerate,
+            ClanPermissions.RequestsManage,
         ],
     },
     {

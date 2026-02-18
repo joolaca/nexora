@@ -2,7 +2,7 @@
 import { Model, Types } from "mongoose";
 import { ClanDocument } from "./clans.schema";
 import { BaseRoles } from "../roles/clan-roles.constants";
-import { UserDocument } from "../users/user.schema";
+import { UserDocument } from "../../users/user.schema";
 
 type RoleKey = "owner" | "admin" | "member";
 

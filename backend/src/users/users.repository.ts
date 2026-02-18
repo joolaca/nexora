@@ -12,8 +12,10 @@ export class UsersRepository {
         return this.userModel.findOne({ username: username.toLowerCase() }).exec();
     }
 
-    findById(id: string) {
-        return this.userModel.findById(id).exec();
+    async findById(userId: string, session?: any) {
+        const q = this.userModel.findById(userId);
+        if (session) q.session(session);
+        return q.exec();
     }
 
     existsByUsername(username: string, excludeUserId?: string) {
