@@ -23,7 +23,7 @@ export function ClanLayout() {
                 </li>
 
                 <li className="nav-item">
-                    <NavLink to="/clan/requests" className={tabClass}>
+                    <NavLink to="requests/invite" className={tabClass}>
                         {t("menu.requests")}
                     </NavLink>
                 </li>

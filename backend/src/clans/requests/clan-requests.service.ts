@@ -69,7 +69,6 @@ export class ClanRequestService {
 
 
     async getInviteRequestsList(params: { actorUserId: string }) {
-        // 1️⃣ Actor user betöltése
         const actor = await this.usersRepo.findById(params.actorUserId);
         if (!actor) {
             throw new AppException(404, "USER_NOT_FOUND", "User not found");
@@ -83,18 +82,15 @@ export class ClanRequestService {
             );
         }
 
-        // 2️⃣ Clan betöltése
         const clan = await this.clansRepo.findById(String(actor.clanId));
         if (!clan) {
             throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
         }
 
-        // 3️⃣ Permission check
         if (!this.hasPermission(clan, params.actorUserId, ClanPermissions.RequestsManage)) {
             throw new AppException( 403, "NO_PERMISSION", "No permission to view invites" );
         }
 
-        // 4️⃣ Invite requestek lekérése
         return this.reqRepo.listPendingInvitesForClan(String(actor.clanId));
     }
 

@@ -1,4 +1,3 @@
-// src/app/router.tsx
 import { createBrowserRouter } from "react-router-dom";
 import { LoginPage } from "../pages/LoginPage";
 import { DashboardPage } from "../pages/DashboardPage";
@@ -10,7 +9,7 @@ import { UsersPage } from "../users/components/UsersPage";
 
 import { ClanLayout } from "../clans/ClanLayout";
 import { ClanOverviewPage } from "../clans/overview/pages/ClanOverviewPage";
-import { ClanRequestsPage } from "../clans/requests/components/ClanRequestsPage";
+import { ClanInvitesList } from "../clans/requests/components/ClanInvitesList";
 
 export const router = createBrowserRouter([
     {
@@ -31,7 +30,10 @@ export const router = createBrowserRouter([
                         element: <ClanLayout />,
                         children: [
                             { index: true, element: <ClanOverviewPage /> },
-                            { path: "requests", element: <ClanRequestsPage /> },
+                            {
+                                path: "requests/invite",
+                                element: <ClanInvitesList />,
+                            },
                         ],
                     },
 

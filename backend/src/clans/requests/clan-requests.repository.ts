@@ -2,7 +2,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { ClanRequest, ClanRequestDocument, ClanRequestStatus, ClanRequestType } from "./clan-request.schema";
+import {
+    ClanRequest,
+    ClanRequestDocument,
+    ClanRequestStatus,
+    ClanRequestType,
+} from "./clan-request.schema";
 
 
 @Injectable()
@@ -86,25 +91,56 @@ export class ClanRequestRepository {
 
 
     async listPendingInvitesForClan(clanId: string) {
-        return this.reqModel
-            .find(
+        const clanObjectId = new Types.ObjectId(clanId);
+
+        const rows = await this.reqModel
+            .aggregate([
                 {
-                    clanId: new Types.ObjectId(clanId),
-                    type: "INVITE",
-                    status: "PENDING",
+                    $match: {
+                        clanId: clanObjectId,
+                        type: "INVITE",
+                        status: "PENDING",
+                    },
                 },
+                { $sort: { createdAt: -1 } },
+
                 {
-                    clanId: 1,
-                    userId: 1,
-                    type: 1,
-                    status: 1,
-                    createdByUserId: 1,
-                    createdAt: 1,
-                }
-            )
-            .sort({ createdAt: -1 })
-            .lean()
+                    $lookup: {
+                        from: "users",
+                        localField: "userId",
+                        foreignField: "_id",
+                        as: "user",
+                    },
+                },
+                { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+
+                {
+                    $project: {
+                        _id: 1,
+                        clanId: 1,
+                        userId: 1,
+                        type: 1,
+                        status: 1,
+                        createdByUserId: 1,
+                        createdAt: 1,
+
+                        // plusz mező:
+                        username: "$user.username",
+                    },
+                },
+            ])
             .exec();
+
+        return rows.map((r: any) => ({
+            requestId: String(r._id),
+            clanId: String(r.clanId),
+            userId: String(r.userId),
+            type: r.type,
+            status: r.status,
+            createdByUserId: String(r.createdByUserId),
+            createdAt: r.createdAt,
+            username: r.username ?? null,
+        }));
     }
 
 }

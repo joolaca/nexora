@@ -23,3 +23,15 @@ export type ClanInviteResponse = {
     status: "PENDING" | "ACCEPTED";
     autoAccepted: boolean;
 };
+
+// Clan -> User pending INVITE list (clan admin view)
+export type ClanInviteListItem = {
+    requestId: string;
+    clanId: string;
+    userId: string;
+    username: string | null;
+    type: "INVITE";
+    status: "PENDING";
+    createdByUserId: string;
+    createdAt: string;
+};

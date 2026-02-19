@@ -39,6 +39,21 @@
       "ACCEPTED": "Accepted",
       "REJECTED": "Rejected",
       "CANCELED": "Canceled"
+    },
+    "invites": {
+      "title": "Sent invitations",
+      "loading": "Loading invitations...",
+      "empty": "No pending invitations.",
+      "error": "Failed to load invitations.",
+      "revoke": "Revoke",
+      "revoking": "Revoking...",
+      "revokeError": "Failed to revoke invitation.",
+      "unknownUser": "Unknown user",
+      "columns": {
+        "user": "User",
+        "createdAt": "Created",
+        "actions": "Actions"
+      }
     }
   }
 }

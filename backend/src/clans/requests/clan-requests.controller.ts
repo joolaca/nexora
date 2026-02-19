@@ -26,7 +26,7 @@ export class ClanRequestController {
     }
 
 
-    @Get("get-invite-request-list")
+    @Get("requests/invites/pending")
     getInviteRequestsList(@Req() req: any) {
         return this.requests.getInviteRequestsList({actorUserId: req.user.userId,});
     }

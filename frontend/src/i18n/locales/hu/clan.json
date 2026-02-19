@@ -39,6 +39,21 @@
       "ACCEPTED": "Elfogadva",
       "REJECTED": "Elutasítva",
       "CANCELED": "Visszavonva"
+    },
+    "invites": {
+      "title": "Elküldött meghívók",
+      "loading": "Meghívók betöltése...",
+      "empty": "Nincs függőben lévő meghívó.",
+      "error": "Nem sikerült betölteni a meghívókat.",
+      "revoke": "Visszavonás",
+      "revoking": "Visszavonás...",
+      "revokeError": "Nem sikerült visszavonni a meghívót.",
+      "unknownUser": "Ismeretlen felhasználó",
+      "columns": {
+        "user": "Felhasználó",
+        "createdAt": "Létrehozva",
+        "actions": "Műveletek"
+      }
     }
   }
 }

@@ -36,10 +36,6 @@ export class ClanInviteFlowRepository {
                     throw new AppException(404, "USER_NOT_FOUND", "User not found");
                 }
 
-                if (target.clanId) {
-                    throw new AppException(409, "USER_ALREADY_IN_CLAN", "User already in a clan");
-                }
-
                 const existing = await this.reqRepo.findPending(
                     params.clanId,
                     params.targetUserId,
