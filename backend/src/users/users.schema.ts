@@ -26,6 +26,9 @@ export class User {
     @Prop({ type: Types.ObjectId, ref: "Clan", default: null, index: true })
     clanId!: Types.ObjectId | null;
 
+    @Prop({type: String,default: "",trim: true,maxlength: 240,})
+    about!: string;
+
 }
 
 

@@ -6,7 +6,7 @@ import { UsersModule } from "../users/users.module";
 import { SeedService } from "./seed.service";
 import { envValidationSchema } from "../config/env.validation";
 import { ClansModule } from "../clans/clans.module";
-import { Clan, ClanSchema } from "../clans/clan.schema";
+import { Clan, ClanSchema } from "../clans/core/clans.schema";
 import { User, UsersSchema } from "../users/users.schema";
 
 @Module({

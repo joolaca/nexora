@@ -3,9 +3,9 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { UsersService } from "../users/users.service";
-import { Clan, ClanDocument } from "../clans/clan.schema";
+import { Clan, ClanDocument } from "../clans/core/clans.schema";
 import { User, UserDocument } from "../users/users.schema";
-import { seedClans, assignUsersToClans } from "../clans/clans.seed";
+import { seedClans, assignUsersToClans } from "../clans/core/clans.seed";
 
 @Injectable()
 export class SeedService {
