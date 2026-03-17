@@ -21,12 +21,18 @@ export class ClanRequestRepository {
         return this.reqModel.findById(id).exec();
     }
 
-    async findPending(clanId: string, userId: string) {
-        return this.reqModel.findOne({
+    async findPending(clanId: string, userId: string, session?: any) {
+        const q = this.reqModel.findOne({
             clanId: new Types.ObjectId(clanId),
             userId: new Types.ObjectId(userId),
             status: "PENDING",
-        }).exec();
+        });
+
+        if (session) {
+            q.session(session);
+        }
+
+        return q.exec();
     }
 
     async createPending(params: {

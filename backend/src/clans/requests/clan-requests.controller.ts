@@ -1,20 +1,24 @@
-// backend/src/clans/requests/clan-requests.controller.ts
-import { Body, Controller, Get,  Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
 import { ClanRequestService } from "./clan-requests.service";
 import { InviteToClanDto } from "./dto/invite.dto";
+import { ClanPermissionGuard } from "../guards/clan-permission.guard";
+import { RequireClanPermission } from "../guards/require-clan-permission.decorator";
+import { ClanPermissions } from "../roles/clan-roles.permissions";
 
 @UseGuards(JwtAuthGuard)
 @Controller("clans")
 export class ClanRequestController {
     constructor(private readonly requests: ClanRequestService) {}
 
-
     // CLAN -> USER invite
     @Post("invite")
+    @UseGuards(ClanPermissionGuard)
+    @RequireClanPermission(ClanPermissions.RequestsManage)
     invite(@Req() req: any, @Body() dto: InviteToClanDto) {
         return this.requests.inviteToClan({
-            actorUserId: req.user.userId,
+            actorUserId: req.clanAuth.actorUserId,
+            clanId: req.clanAuth.clanId,
             targetUserId: dto.userId,
         });
     }
@@ -25,10 +29,12 @@ export class ClanRequestController {
         return this.requests.listMyRequests(req.user.userId);
     }
 
-
     @Get("requests/invites/pending")
+    @UseGuards(ClanPermissionGuard)
+    @RequireClanPermission(ClanPermissions.RequestsManage)
     getInviteRequestsList(@Req() req: any) {
-        return this.requests.getInviteRequestsList({actorUserId: req.user.userId,});
+        return this.requests.getInviteRequestsList({
+            clanId: req.clanAuth.clanId,
+        });
     }
-
 }

@@ -66,7 +66,7 @@ export async function assignUsersToClans(params: {
 
     const getUserId = (n: number) => {
         const id = idByUsername.get(`user${n}`);
-        if (!id) throw new Error(`Clan assign: missing user${n}. (Előbb user seed!)`);
+        if (!id) throw new Error(`Clan assign: missing user${n}.`);
         return id;
     };
 

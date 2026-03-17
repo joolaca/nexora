@@ -39,6 +39,7 @@ export class ClanInviteFlowRepository {
                 const existing = await this.reqRepo.findPending(
                     params.clanId,
                     params.targetUserId,
+                    session,
                 );
 
                 if (existing) {
