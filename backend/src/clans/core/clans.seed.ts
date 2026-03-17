@@ -55,14 +55,14 @@ export async function assignUsersToClans(params: {
 }) {
     const { clanModel, userModel, clanIds } = params;
 
-    const usernames = range(1, 15).map((i) => `user${i}`);
+    const usernames = range(1, 30).map((i) => `user${i}`);
     const users = await userModel
         .find({ username: { $in: usernames } }, { _id: 1, username: 1 })
         .lean()
         .exec();
 
     const idByUsername = new Map<string, Types.ObjectId>();
-    for (const u of users) idByUsername.set(String(u.username), new Types.ObjectId(String(u._id)));
+    for (const u of users) idByUsername.set(String(u.username), u._id as Types.ObjectId);
 
     const getUserId = (n: number) => {
         const id = idByUsername.get(`user${n}`);
