@@ -20,7 +20,6 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ResponseWrapInterceptor());
     app.useGlobalFilters(new GlobalHttpExceptionFilter());
 
-    // --- Swagger / OpenAPI (listen ELŐTT) ---
     const config = new DocumentBuilder()
         .setTitle("Nexora API")
         .setDescription("Nexora backend OpenAPI dokumentáció")
@@ -31,7 +30,6 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup("api", app, document); // http://localhost:5000/api
 
-    // ✅ csak egyszer listen
     const port = process.env.PORT ? Number(process.env.PORT) : 5000;
     await app.listen(port);
 

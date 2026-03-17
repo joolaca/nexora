@@ -24,11 +24,13 @@ export class UsersService {
         return this.usersRepo.findById(id);
     }
 
-    getById(id:string){
-        const user = this.usersRepo.findById(id);
-        if(!user){
-            throw new AppException(404, "USER_NOT_FOUND", "User not found", {userId:id});
+    async getById(id: string) {
+        const user = await this.usersRepo.findById(id);
+
+        if (!user) {
+            throw new AppException(404, "USER_NOT_FOUND", "User not found", { userId: id });
         }
+
         return user;
     }
 
