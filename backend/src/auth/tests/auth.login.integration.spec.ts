@@ -1,5 +1,5 @@
-//backend/src/users/tests/auth.login.integration.spec.ts
-// npx jest src/auth/tests/auth.login.integration.spec.ts --runInBand
+// backend/src/users/tests/auth.login.integration.spec.ts
+// npx jest auth.login.integration.spec.ts --runInBand
 
 import request from "supertest";
 import { Test } from "@nestjs/testing";
@@ -62,5 +62,24 @@ describe("Auth (integration) /auth/login", () => {
         );
 
         expect(res.body.token.length).toBeGreaterThan(10);
+    });
+
+    it("POST /auth/login -> should return error if password is wrong", async () => {
+        const createdUser = await usersFixtureService.createTestUser({
+            username: `login_wrong_pw_${Date.now()}`,
+            plainPassword: "123",
+        });
+
+        createdUserIds.push(createdUser.id);
+
+        const res = await request(app.getHttpServer())
+            .post("/auth/login")
+            .send({
+                username: createdUser.username,
+                password: "rossz-jelszo",
+            });
+
+        expect(res.status).toBe(409);
+
     });
 });
