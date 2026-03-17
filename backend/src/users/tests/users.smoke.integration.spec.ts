@@ -1,3 +1,5 @@
+//backend/src/users/tests/users.smoke.integration.spec.ts
+//npx jest src/users/tests/users.smoke.integration.spec.ts --runInBand
 import request from "supertest";
 import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
