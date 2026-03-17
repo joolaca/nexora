@@ -11,6 +11,7 @@ async function bootstrap() {
     if (process.env.NODE_ENV === "production") {
         throw new Error("SEED is disabled in production.");
     }
+
     if (!process.env.MONGO_URI) {
         throw new Error("Missing MONGO_URI");
     }

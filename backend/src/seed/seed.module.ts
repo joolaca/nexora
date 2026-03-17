@@ -1,4 +1,4 @@
-//backend/src/seed/seed.module.ts
+// backend/src/seed/seed.module.ts
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -15,7 +15,6 @@ import { User, UsersSchema } from "../users/users.schema";
             isGlobal: true,
             validationSchema: envValidationSchema,
         }),
-
         MongooseModule.forRootAsync({
             inject: [ConfigService],
             useFactory: async (config: ConfigService) => ({

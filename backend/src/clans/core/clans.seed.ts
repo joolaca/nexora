@@ -71,9 +71,9 @@ export async function assignUsersToClans(params: {
     };
 
     const groups = [
-        { clanId: clanIds.clan1Id, users: range(1, 5), owner: 1 },
-        { clanId: clanIds.clan2Id, users: range(6, 10), owner: 6 },
-        { clanId: clanIds.clan3Id, users: range(11, 15), owner: 11 },
+        { clanId: clanIds.clan1Id, users: range(1, 10), owner: 1 },
+        { clanId: clanIds.clan2Id, users: range(11, 20), owner: 11 },
+        { clanId: clanIds.clan3Id, users: range(21, 30), owner: 21 },
     ] as const;
 
     await userModel.updateMany(

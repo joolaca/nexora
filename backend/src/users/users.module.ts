@@ -7,11 +7,15 @@ import { UsersRepository } from "./users.repository";
 import { UsersListRepository } from "./users.list.repository";
 import { UsersController } from "./users.controller";
 import { ClansModule } from "../clans/clans.module";
+import { UsersFixtureService } from "./users-fixture.service";
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: User.name, schema: UsersSchema }]), ClansModule],
+    imports: [
+        MongooseModule.forFeature([{ name: User.name, schema: UsersSchema }]),
+        ClansModule,
+    ],
     controllers: [UsersController],
-    providers: [UsersService, UsersRepository, UsersListRepository],
-    exports: [UsersService, UsersRepository, UsersListRepository],
+    providers: [UsersService, UsersRepository, UsersListRepository, UsersFixtureService],
+    exports: [UsersService, UsersRepository, UsersListRepository, UsersFixtureService],
 })
 export class UsersModule {}

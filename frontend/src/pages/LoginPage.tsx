@@ -9,7 +9,7 @@ const AUTH_FLASH_KEY = "auth_error_flash";
 
 export function LoginPage() {
     const { t } = useTranslation();
-    const [username, setUsername] = useState("user11");
+    const [username, setUsername] = useState("user1");
     const [password, setPassword] = useState("123");
     const login = useLogin();
 
