@@ -14,7 +14,7 @@ import {
     type UsersClanFilter,
     type UsersSortKey,
 } from "./users.list.repository";
-import { ClansService } from "../clans/overview/clan-overview.service";
+import { ClanOverviewService } from "../clans/overview/clan-overview.service";
 import { AppException } from "../common/errors/app-exception";
 
 @Injectable()
@@ -22,7 +22,7 @@ export class UsersService {
     constructor(
         private readonly usersRepo: UsersRepository,
         private readonly usersListRepo: UsersListRepository,
-        private readonly clansService: ClansService,
+        private readonly clanOverviewService: ClanOverviewService,
     ) {}
 
     findByUsername(username: string) {
@@ -154,7 +154,7 @@ export class UsersService {
             ),
         );
 
-        const clanById = await this.clansService.getSummariesByIds(clanIds);
+        const clanById = await this.clanOverviewService.getSummariesByIds(clanIds);
 
         const items = users.map((u: any) => {
             const clan = u.clanId ? clanById.get(String(u.clanId)) ?? null : null;

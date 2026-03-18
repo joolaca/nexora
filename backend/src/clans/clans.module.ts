@@ -1,17 +1,24 @@
+// backend/src/clans/clans.module.ts
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { Clan, ClanSchema } from "./core/clans.schema";
-import { ClansController } from "./overview/clan-overview.controller";
-import { ClansService } from "./overview/clan-overview.service";
-import { ClansOverviewRepository } from "./overview/clan-overview.repository";
-import { ClansRepository } from "./clans.repository";
-import { ClanRequestController } from "./requests/clan-requests.controller";
-import { ClanRequestService } from "./requests/clan-requests.service";
-import { ClanRequestRepository } from "./requests/clan-requests.repository";
 import { ClanRequest, ClanRequestSchema } from "./requests/clan-request.schema";
 import { User, UsersSchema } from "../users/users.schema";
-import { UsersRepository } from "../users/users.repository";
+
+import { ClansRepository } from "./core/clans.repository";
+import { ClansOverviewRepository } from "./overview/clan-overview.repository";
+import { ClanOverviewService } from "./overview/clan-overview.service";
+import { ClansOverviewController } from "./overview/clan-overview.controller";
+
+import { ClanManagementService } from "./management/clan-management.service";
+import { ClanManagementController } from "./management/clan-management.controller";
+
+import { ClanRequestService } from "./requests/clan-requests.service";
+import { ClanRequestRepository } from "./requests/clan-requests.repository";
 import { ClanInviteFlowRepository } from "./requests/clan-invite-flow.repository";
+import { ClanRequestController } from "./requests/clan-requests.controller";
+
+import { UsersRepository } from "../users/users.repository";
 import { ClanPermissionGuard } from "./guards/clan-permission.guard";
 
 @Module({
@@ -22,17 +29,26 @@ import { ClanPermissionGuard } from "./guards/clan-permission.guard";
             { name: User.name, schema: UsersSchema },
         ]),
     ],
-    controllers: [ClansController, ClanRequestController],
+    controllers: [
+        ClansOverviewController,
+        ClanManagementController,
+        ClanRequestController,
+    ],
     providers: [
-        ClansService,
         ClansRepository,
         ClansOverviewRepository,
+        ClanOverviewService,
+        ClanManagementService,
         ClanRequestService,
         ClanRequestRepository,
-        UsersRepository,
         ClanInviteFlowRepository,
+        UsersRepository,
         ClanPermissionGuard,
     ],
-    exports: [ClansService, ClanRequestService],
+    exports: [
+        ClanOverviewService,
+        ClanManagementService,
+        ClanRequestService,
+    ],
 })
 export class ClansModule {}
