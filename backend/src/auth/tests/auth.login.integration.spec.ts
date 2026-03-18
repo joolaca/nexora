@@ -35,9 +35,10 @@ describe("Auth (integration) /auth/login", () => {
     });
 
     it("POST /auth/login -> should login with a valid username and password", async () => {
+        const plainPassword = "secret123"
         const createdUser = await usersFixtureService.createTestUser({
-            username: `login_test_user_${Date.now()}`,
-            plainPassword: "123",
+            username: "login_test_user_1",
+            plainPassword: plainPassword,
         });
 
         createdUserIds.push(createdUser.id);
@@ -46,7 +47,7 @@ describe("Auth (integration) /auth/login", () => {
             .post("/auth/login")
             .send({
                 username: createdUser.username,
-                password: createdUser.plainPassword,
+                password: plainPassword,
             });
 
         expect([200, 201]).toContain(res.status);

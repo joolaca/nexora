@@ -8,6 +8,7 @@ import { UsersListRepository } from "./users.list.repository";
 import { UsersController } from "./users.controller";
 import { ClansModule } from "../clans/clans.module";
 import { UsersFixtureService } from "./users-fixture.service";
+import { UsersFactory } from "./users.factory";
 
 @Module({
     imports: [
@@ -15,7 +16,19 @@ import { UsersFixtureService } from "./users-fixture.service";
         ClansModule,
     ],
     controllers: [UsersController],
-    providers: [UsersService, UsersRepository, UsersListRepository, UsersFixtureService],
-    exports: [UsersService, UsersRepository, UsersListRepository, UsersFixtureService],
+    providers: [
+        UsersService,
+        UsersRepository,
+        UsersListRepository,
+        UsersFactory,
+        UsersFixtureService,
+    ],
+    exports: [
+        UsersService,
+        UsersRepository,
+        UsersListRepository,
+        UsersFactory,
+        UsersFixtureService,
+    ],
 })
 export class UsersModule {}

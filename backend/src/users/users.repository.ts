@@ -3,13 +3,8 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { User, UserDocument } from "./users.schema";
+import { CreateUserDbParams } from "./users.types";
 
-export type CreateUserDbParams = {
-    username: string;
-    passwordHash: string;
-    rank?: number;
-    about?: string;
-};
 
 @Injectable()
 export class UsersRepository {
@@ -38,10 +33,10 @@ export class UsersRepository {
 
     async createUser(params: CreateUserDbParams) {
         return this.userModel.create({
-            username: params.username.toLowerCase(),
+            username: params.username,
             password: params.passwordHash,
-            rank: params.rank ?? 0,
-            about: params.about ?? "",
+            rank: params.rank,
+            about: params.about,
         });
     }
 

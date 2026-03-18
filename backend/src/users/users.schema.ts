@@ -1,6 +1,6 @@
-
+// backend/src/users/users.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types  } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -26,10 +26,13 @@ export class User {
     @Prop({ type: Types.ObjectId, ref: "Clan", default: null, index: true })
     clanId!: Types.ObjectId | null;
 
-    @Prop({type: String,default: "",trim: true,maxlength: 240,})
+    @Prop({
+        type: String,
+        default: "",
+        trim: true,
+        maxlength: 240,
+    })
     about!: string;
-
 }
-
 
 export const UsersSchema = SchemaFactory.createForClass(User);

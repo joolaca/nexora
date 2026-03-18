@@ -7,7 +7,8 @@ import {
 } from "@nestjs/common";
 import * as bcrypt from "bcryptjs";
 import { UpdateMeDto } from "./dto/update-me.dto";
-import { UsersRepository, CreateUserDbParams } from "./users.repository";
+import { UsersRepository } from "./users.repository";
+import { CreateUserInput, CreateUserDbParams } from "./users.types";
 import {
     UsersListRepository,
     type UsersClanFilter,
@@ -15,13 +16,6 @@ import {
 } from "./users.list.repository";
 import { ClansService } from "../clans/overview/clan-overview.service";
 import { AppException } from "../common/errors/app-exception";
-
-export type CreateUserInput = {
-    username: string;
-    plainPassword: string;
-    rank?: number;
-    about?: string;
-};
 
 @Injectable()
 export class UsersService {
@@ -54,31 +48,24 @@ export class UsersService {
             username: input.username.trim().toLowerCase(),
             passwordHash: await bcrypt.hash(input.plainPassword, 10),
             rank: input.rank,
-            about: input.about,
+            about: input.about?.trim(),
         };
     }
 
     async createUserRecord(input: CreateUserInput) {
-        const prepared = await this.buildCreateUserData(input);
-        return this.usersRepo.createUser(prepared);
-    }
-
-    async createUser(username: string, plainPassword: string) {
-        const exists = await this.usersRepo.findByUsername(username);
+        const normalizedUsername = input.username.trim().toLowerCase();
+        const exists = await this.usersRepo.existsByUsername(normalizedUsername);
 
         if (exists) {
             throw new ConflictException("Username already taken");
         }
 
-        const created = await this.createUserRecord({
-            username,
-            plainPassword,
+        const prepared = await this.buildCreateUserData({
+            ...input,
+            username: normalizedUsername,
         });
 
-        return {
-            id: String(created._id),
-            username: created.username,
-        };
+        return this.usersRepo.createUser(prepared);
     }
 
     async deleteUserById(userId: string) {
