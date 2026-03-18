@@ -1,7 +1,7 @@
 // backend/src/users/users.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { ClientSession, Model, Types } from "mongoose";
 import { User, UserDocument } from "./users.schema";
 import { CreateUserDbParams } from "./users.types";
 
@@ -51,4 +51,22 @@ export class UsersRepository {
     async deleteByUsername(username: string) {
         return this.userModel.deleteOne({ username: username.toLowerCase() }).exec();
     }
+
+    async setClanId(userId: string, clanId: string | null, session?: ClientSession) {
+        const update = clanId
+            ? { $set: { clanId: new Types.ObjectId(clanId) } }
+            : { $set: { clanId: null } };
+
+        const q = this.userModel.updateOne(
+            { _id: new Types.ObjectId(userId) },
+            update,
+        );
+
+        if (session) {
+            q.session(session);
+        }
+
+        return q.exec();
+    }
+
 }
