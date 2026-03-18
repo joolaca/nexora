@@ -7,7 +7,7 @@ import { UsersRepository } from "./users.repository";
 import { UsersListRepository } from "./users.list.repository";
 import { UsersController } from "./users.controller";
 import { ClansModule } from "../clans/clans.module";
-import { UsersFixtureService } from "./users-fixture.service";
+import { UsersBuilderService } from "./users-builder.service";
 import { UsersFactory } from "./users.factory";
 
 @Module({
@@ -21,14 +21,14 @@ import { UsersFactory } from "./users.factory";
         UsersRepository,
         UsersListRepository,
         UsersFactory,
-        UsersFixtureService,
+        UsersBuilderService,
     ],
     exports: [
         UsersService,
         UsersRepository,
         UsersListRepository,
         UsersFactory,
-        UsersFixtureService,
+        UsersBuilderService,
     ],
 })
 export class UsersModule {}

@@ -5,7 +5,6 @@ import { ClientSession, Model, Types } from "mongoose";
 import { User, UserDocument } from "./users.schema";
 import { CreateUserDbParams } from "./users.types";
 
-
 @Injectable()
 export class UsersRepository {
     constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {}
@@ -14,9 +13,13 @@ export class UsersRepository {
         return this.userModel.findOne({ username: username.toLowerCase() }).exec();
     }
 
-    async findById(userId: string, session?: any) {
+    async findById(userId: string, session?: ClientSession) {
         const q = this.userModel.findById(userId);
-        if (session) q.session(session);
+
+        if (session) {
+            q.session(session);
+        }
+
         return q.exec();
     }
 
@@ -44,14 +47,6 @@ export class UsersRepository {
         return doc.save();
     }
 
-    async deleteById(userId: string) {
-        return this.userModel.deleteOne({ _id: userId }).exec();
-    }
-
-    async deleteByUsername(username: string) {
-        return this.userModel.deleteOne({ username: username.toLowerCase() }).exec();
-    }
-
     async setClanId(userId: string, clanId: string | null, session?: ClientSession) {
         const update = clanId
             ? { $set: { clanId: new Types.ObjectId(clanId) } }
@@ -69,4 +64,36 @@ export class UsersRepository {
         return q.exec();
     }
 
+    async clearClanIdForUsers(userIds: string[], session?: ClientSession) {
+        if (!userIds.length) {
+            return { matchedCount: 0, modifiedCount: 0 };
+        }
+
+        const q = this.userModel.updateMany(
+            {
+                _id: {
+                    $in: userIds.map((id) => new Types.ObjectId(id)),
+                },
+            },
+            {
+                $set: {
+                    clanId: null,
+                },
+            },
+        );
+
+        if (session) {
+            q.session(session);
+        }
+
+        return q.exec();
+    }
+
+    async deleteById(userId: string) {
+        return this.userModel.deleteOne({ _id: userId }).exec();
+    }
+
+    async deleteByUsername(username: string) {
+        return this.userModel.deleteOne({ username: username.toLowerCase() }).exec();
+    }
 }

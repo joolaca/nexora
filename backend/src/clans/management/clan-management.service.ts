@@ -7,8 +7,9 @@ import { EditClanDto } from "./dto/edit-clan.dto";
 import { AppException } from "../../common/errors/app-exception";
 import { ClanPermissions } from "../roles/clan-roles.permissions";
 import { BaseRoles } from "../roles/clan-roles.constants";
-import { ClansRepository } from "../core/clans.repository";
 import { UsersRepository } from "../../users/users.repository";
+import { ClanManagementRepository } from "./clan-management.repository";
+import { ClanRequestRepository } from "../requests/clan-requests.repository";
 
 function slugify(input: string) {
     return input
@@ -23,8 +24,9 @@ function slugify(input: string) {
 export class ClanManagementService {
     constructor(
         @InjectConnection() private readonly connection: Connection,
-        private readonly clansRepo: ClansRepository,
+        private readonly clanManagementRepo: ClanManagementRepository,
         private readonly usersRepo: UsersRepository,
+        private readonly clanRequestRepo: ClanRequestRepository,
     ) {}
 
     private getMemberRoleKey(clan: any, userId: string): string | null {
@@ -68,7 +70,7 @@ export class ClanManagementService {
             });
         }
 
-        const exists = await this.clansRepo.existsBySlug(slug);
+        const exists = await this.clanManagementRepo.existsBySlug(slug);
 
         if (exists) {
             throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", { slug });
@@ -79,7 +81,7 @@ export class ClanManagementService {
         try {
             session.startTransaction();
 
-            const created = await this.clansRepo.createClan(
+            const created = await this.clanManagementRepo.createClan(
                 {
                     name: dto.name.trim(),
                     slug,
@@ -112,7 +114,7 @@ export class ClanManagementService {
             throw new AppException(400, "NOTHING_TO_UPDATE", "Nothing to update");
         }
 
-        const clan = await this.clansRepo.findByMemberUserId(userId);
+        const clan = await this.clanManagementRepo.findByMemberUserId(userId);
 
         if (!clan) {
             throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
@@ -136,11 +138,13 @@ export class ClanManagementService {
             const newSlug = dto.slug.trim().toLowerCase();
 
             if (!newSlug) {
-                throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", { slug: dto.slug });
+                throw new AppException(409, "INVALID_CLAN_SLUG", "Invalid clan slug", {
+                    slug: dto.slug,
+                });
             }
 
             if (newSlug !== clan.slug) {
-                const exists = await this.clansRepo.existsBySlug(newSlug, String(clan._id));
+                const exists = await this.clanManagementRepo.existsBySlug(newSlug, String(clan._id));
 
                 if (exists) {
                     throw new AppException(409, "CLAN_SLUG_TAKEN", "Clan slug already taken", {
@@ -152,12 +156,51 @@ export class ClanManagementService {
             }
         }
 
-        await this.clansRepo.save(clan);
+        await this.clanManagementRepo.save(clan);
 
         return {
             id: String(clan._id),
             name: clan.name,
             slug: clan.slug,
         };
+    }
+
+    async deleteClanById(clanId: string) {
+        const session = await this.connection.startSession();
+
+        try {
+            session.startTransaction();
+
+            const clan = await this.clanManagementRepo.findById(clanId, session);
+
+            if (!clan) {
+                await session.commitTransaction();
+
+                return {
+                    deleted: 0,
+                    clearedUsers: 0,
+                    deletedRequests: 0,
+                };
+            }
+
+            const memberUserIds = clan.members.map((member: any) => String(member.userId));
+
+            const deleteRequestsRes = await this.clanRequestRepo.deleteByClanId(clanId, session);
+            const clearUsersRes = await this.usersRepo.clearClanIdForUsers(memberUserIds, session);
+            const deleteClanRes = await this.clanManagementRepo.deleteById(clanId, session);
+
+            await session.commitTransaction();
+
+            return {
+                deleted: deleteClanRes.deletedCount || 0,
+                clearedUsers: clearUsersRes.modifiedCount || 0,
+                deletedRequests: deleteRequestsRes.deletedCount || 0,
+            };
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            await session.endSession();
+        }
     }
 }

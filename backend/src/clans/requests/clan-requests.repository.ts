@@ -1,4 +1,4 @@
-//backend/src/clans/requests/clan-requests.repository.ts
+// backend/src/clans/requests/clan-requests.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -8,7 +8,6 @@ import {
     ClanRequestStatus,
     ClanRequestType,
 } from "./clan-request.schema";
-
 
 @Injectable()
 export class ClanRequestRepository {
@@ -79,6 +78,13 @@ export class ClanRequestRepository {
         );
     }
 
+    async deleteByClanId(clanId: string, session?: any) {
+        return this.reqModel.deleteMany(
+            { clanId: new Types.ObjectId(clanId) },
+            { session },
+        );
+    }
+
     async listForUser(userId: string) {
         return this.reqModel
             .find({ userId: new Types.ObjectId(userId) }, { clanId: 1, userId: 1, type: 1, status: 1, createdAt: 1, updatedAt: 1 })
@@ -95,7 +101,6 @@ export class ClanRequestRepository {
             .exec();
     }
 
-
     async listPendingInvitesForClan(clanId: string) {
         const clanObjectId = new Types.ObjectId(clanId);
 
@@ -109,7 +114,6 @@ export class ClanRequestRepository {
                     },
                 },
                 { $sort: { createdAt: -1 } },
-
                 {
                     $lookup: {
                         from: "users",
@@ -119,7 +123,6 @@ export class ClanRequestRepository {
                     },
                 },
                 { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-
                 {
                     $project: {
                         _id: 1,
@@ -129,8 +132,6 @@ export class ClanRequestRepository {
                         status: 1,
                         createdByUserId: 1,
                         createdAt: 1,
-
-                        // plusz mező:
                         username: "$user.username",
                     },
                 },
@@ -148,5 +149,4 @@ export class ClanRequestRepository {
             username: r.username ?? null,
         }));
     }
-
 }

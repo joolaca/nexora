@@ -5,11 +5,11 @@ import request from "supertest";
 import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import { AppModule } from "../../app.module";
-import { UsersFixtureService } from "../../users/users-fixture.service";
+import { UsersBuilderService } from "../../users/users-builder.service";
 
 describe("Auth (integration) /auth/login", () => {
     let app: INestApplication;
-    let usersFixtureService: UsersFixtureService;
+    let usersFixtureService: UsersBuilderService;
 
     const createdUserIds: string[] = [];
 
@@ -21,7 +21,7 @@ describe("Auth (integration) /auth/login", () => {
         app = modRef.createNestApplication();
         await app.init();
 
-        usersFixtureService = modRef.get(UsersFixtureService);
+        usersFixtureService = modRef.get(UsersBuilderService);
     });
 
     afterEach(async () => {

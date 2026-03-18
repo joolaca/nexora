@@ -1,11 +1,11 @@
-// backend/src/users/users-fixture.service.ts
+// backend/src/users/users-builder.service.ts
 import { Injectable } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UsersFactory } from "./users.factory";
 import { CreateUserOverrides } from "./users.types";
 
 @Injectable()
-export class UsersFixtureService {
+export class UsersBuilderService {
     constructor(
         private readonly usersService: UsersService,
         private readonly usersFactory: UsersFactory,

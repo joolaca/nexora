@@ -5,14 +5,14 @@ import { Model } from "mongoose";
 import { Clan, ClanDocument } from "../clans/core/clans.schema";
 import { User, UserDocument } from "../users/users.schema";
 import { seedClans, assignUsersToClans } from "../clans/core/clans.seed";
-import { UsersFixtureService } from "../users/users-fixture.service";
+import { UsersBuilderService } from "../users/users-builder.service";
 
 @Injectable()
 export class SeedService {
     private readonly logger = new Logger(SeedService.name);
 
     constructor(
-        private readonly usersFixtureService: UsersFixtureService,
+        private readonly usersFixtureService: UsersBuilderService,
         @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>,
         @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     ) {}
