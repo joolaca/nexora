@@ -13,10 +13,12 @@ import { createTestJwt } from "../../../helpers/auth.helper";
 import { ClansBuilderService } from "../../builders/clans.builder.service";
 import { ClanManagementService } from "../../management/clan-management.service";
 import { ClanRequestRepository } from "../clan-requests.repository";
+import {UsersService} from "../../../users/users.service";
 
 describe("Clan invite (integration) /clans/invite", () => {
     let app: INestApplication;
     let usersBuilderService: UsersBuilderService;
+    let usersService: UsersService;
     let clansBuilderService: ClansBuilderService;
     let clanManagementService: ClanManagementService;
     let clanRequestRepository: ClanRequestRepository;
@@ -37,6 +39,7 @@ describe("Clan invite (integration) /clans/invite", () => {
         clansBuilderService = modRef.get(ClansBuilderService);
         clanManagementService = modRef.get(ClanManagementService);
         clanRequestRepository = modRef.get(ClanRequestRepository);
+        usersService = modRef.get(UsersService);
         jwtService = modRef.get(JwtService);
     });
 
@@ -46,7 +49,7 @@ describe("Clan invite (integration) /clans/invite", () => {
         }
 
         for (const userId of createdUserIds) {
-            await usersBuilderService.deleteUserById(userId);
+            await usersService.deleteUserById(userId);
         }
 
         createdClanIds.clear();
@@ -74,9 +77,6 @@ describe("Clan invite (integration) /clans/invite", () => {
         return user;
     }
 
-    /**
-     * 🔥 COMMON ARRANGE HELPER
-     */
     async function createClanActorContext() {
         const owner = await createTrackedUser();
 

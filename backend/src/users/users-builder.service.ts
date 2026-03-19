@@ -20,7 +20,4 @@ export class UsersBuilderService {
         return this.usersService.deleteUserById(userId);
     }
 
-    async deleteUserByUsername(username: string) {
-        return this.usersService.deleteUserByUsername(username);
-    }
 }
