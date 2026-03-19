@@ -40,11 +40,7 @@ export class ClanPermissionGuard implements CanActivate {
             );
 
         if (!requiredPermission) {
-            throw new AppException(
-                500,
-                "CLAN_PERMISSION_NOT_DEFINED",
-                "Missing @RequireClanPermission on route",
-            );
+            throw new AppException( 500, "CLAN_PERMISSION_NOT_DEFINED");
         }
 
 
@@ -52,23 +48,23 @@ export class ClanPermissionGuard implements CanActivate {
         const actorUserId = req.user?.userId;
 
         if (!actorUserId) {
-            throw new AppException(401, "UNAUTHORIZED", "Unauthorized");
+            throw new AppException(401, "UNAUTHORIZED", );
         }
 
         const actorUser = await this.usersRepo.findById(actorUserId);
         if (!actorUser) {
-            throw new AppException(404, "USER_NOT_FOUND", "User not found");
+            throw new AppException(404, "USER_NOT_FOUND", );
         }
 
         if (!actorUser.clanId) {
-            throw new AppException(409, "USER_NOT_IN_CLAN", "User is not in a clan");
+            throw new AppException(409, "USER_NOT_IN_CLAN", );
         }
 
         const clanId = String(actorUser.clanId);
 
         const clan = await this.clansRepo.findById(clanId);
         if (!clan) {
-            throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
+            throw new AppException(404, "CLAN_NOT_FOUND", );
         }
 
         const member = clan.members.find(
@@ -76,16 +72,16 @@ export class ClanPermissionGuard implements CanActivate {
         );
 
         if (!member) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", "User is not a clan member");
+            throw new AppException(403, "NOT_CLAN_MEMBER", );
         }
 
         const role = clan.roles.find((r: any) => r.key === member.roleKey);
         if (!role) {
-            throw new AppException(403, "ROLE_NOT_FOUND", "Clan role not found");
+            throw new AppException(403, "ROLE_NOT_FOUND", );
         }
 
         if (!role.permissions.includes(requiredPermission)) {
-            throw new AppException(403, "NO_PERMISSION", "No permission");
+            throw new AppException(403, "NO_PERMISSION", );
         }
 
         req.clanAuth = {

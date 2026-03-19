@@ -17,16 +17,17 @@ export class ClanOverviewService {
     }
 
     async getMyClan(userId: string) {
+
         const clan = await this.clansRepo.findByMemberUserId(userId);
 
         if (!clan) {
-            throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
+            throw new AppException(404, "CLAN_NOT_FOUND", );
         }
 
         const myRole = this.getMemberRoleKey(clan, userId);
 
         if (!myRole) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", "Not a clan member");
+            throw new AppException(403, "NOT_CLAN_MEMBER", );
         }
 
         const role = clan.roles.find((r: any) => r.key === myRole);

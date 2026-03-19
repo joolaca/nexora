@@ -1,11 +1,12 @@
-// backend/src/common/filters/http-exception.filter.ts
 import {
     ArgumentsHost,
     Catch,
     ExceptionFilter,
     HttpException,
     HttpStatus,
+    Injectable,
 } from "@nestjs/common";
+import { ErrorReportingService } from "../errors/error-reporting.service";
 
 function isProductionEnv() {
     return process.env.NODE_ENV === "production";
@@ -26,9 +27,14 @@ function extractThrownAt(stack?: string): string | null {
     return preferred ?? null;
 }
 
+@Injectable()
 @Catch()
 export class GlobalHttpExceptionFilter implements ExceptionFilter {
-    catch(exception: any, host: ArgumentsHost) {
+    constructor(
+        private readonly errorReportingService: ErrorReportingService,
+    ) {}
+
+    async catch(exception: any, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const res = ctx.getResponse();
         const req = ctx.getRequest();
@@ -44,6 +50,10 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
         let message: any = exception?.message ?? "Internal error";
         let code: string | undefined;
         let params: Record<string, any> | undefined;
+        let context: Record<string, any> | undefined;
+        let severity: string | undefined;
+        let kind: string | undefined;
+        let domain: string | null | undefined;
 
         if (typeof responseBody === "string") {
             message = responseBody;
@@ -51,19 +61,40 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
             const rb = responseBody as Record<string, any>;
 
             message = rb.message ?? message;
-
             code = rb.code;
             params = rb.params;
+            context = rb.context;
+            severity = rb.severity;
+            kind = rb.kind;
+            domain = rb.domain;
         }
 
         const showDebug = !isProductionEnv();
         const thrownAt = showDebug ? extractThrownAt(exception?.stack) : null;
+        const stack = showDebug ? exception?.stack : undefined;
+
+        const actorUserId =
+            req?.user?.userId ??
+            context?.actorUserId ??
+            null;
+
+        await this.errorReportingService.report(exception, {
+            path: req?.url,
+            method: req?.method,
+            actorUserId,
+            thrownAt,
+            stack,
+        });
 
         const error = {
             statusCode: status,
             code,
             params,
+            context,
             message,
+            severity,
+            kind,
+            domain,
 
             path: req?.url,
             method: req?.method,

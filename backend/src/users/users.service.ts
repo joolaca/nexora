@@ -37,7 +37,7 @@ export class UsersService {
         const user = await this.usersRepo.findById(id);
 
         if (!user) {
-            throw new AppException(404, "USER_NOT_FOUND", "User not found", { userId: id });
+            throw new AppException(404, "USER_NOT_FOUND", );
         }
 
         return user;

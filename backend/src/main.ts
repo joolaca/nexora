@@ -3,7 +3,6 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { ResponseWrapInterceptor } from "./common/interceptors/response-wrap.interceptor";
-import { GlobalHttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 console.log("BOOT_ID", Date.now(), "PID", process.pid);
@@ -18,7 +17,6 @@ async function bootstrap() {
 
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     app.useGlobalInterceptors(new ResponseWrapInterceptor());
-    app.useGlobalFilters(new GlobalHttpExceptionFilter());
 
     const config = new DocumentBuilder()
         .setTitle("Nexora API")

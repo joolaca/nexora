@@ -28,12 +28,12 @@ export class ClanInviteFlowRepository {
             await session.withTransaction(async () => {
                 const clan = await this.clansRepo.findById(params.clanId, session);
                 if (!clan) {
-                    throw new AppException(404, "CLAN_NOT_FOUND", "Clan not found");
+                    throw new AppException(404, "CLAN_NOT_FOUND", );
                 }
 
                 const target = await this.usersRepo.findById(params.targetUserId, session);
                 if (!target) {
-                    throw new AppException(404, "USER_NOT_FOUND", "User not found");
+                    throw new AppException(404, "USER_NOT_FOUND", );
                 }
 
                 const existing = await this.reqRepo.findPending(

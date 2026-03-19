@@ -7,6 +7,9 @@ import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { ClansModule } from "./clans/clans.module";
 import { envValidationSchema } from "./config/env.validation";
+import { APP_FILTER } from "@nestjs/core";
+import { ErrorsModule } from "./common/errors/errors.module";
+import { GlobalHttpExceptionFilter } from "./common/filters/http-exception.filter";
 
 @Module({
     imports: [
@@ -32,10 +35,16 @@ import { envValidationSchema } from "./config/env.validation";
             },
         }),
 
-
+        ErrorsModule,
         UsersModule,
         AuthModule,
         ClansModule,
+    ],
+    providers: [
+        {
+            provide: APP_FILTER,
+            useClass: GlobalHttpExceptionFilter,
+        },
     ],
 })
 export class AppModule implements NestModule {

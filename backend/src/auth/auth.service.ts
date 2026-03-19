@@ -18,13 +18,13 @@ export class AuthService {
         const user = await this.usersRepo.findByUsername(username);
 
         if (!user) {
-            throw new AppException(409, "INVALID_CREDENTIALS", "Invalid credentials");
+            throw new AppException(409, "INVALID_CREDENTIALS", );
         }
 
         const ok = await bcrypt.compare(password, user.password);
 
         if (!ok) {
-            throw new AppException(409, "INVALID_CREDENTIALS", "Invalid credentials");
+            throw new AppException(409, "INVALID_CREDENTIALS", );
         }
 
         const token = await this.jwt.signAsync(
@@ -45,7 +45,7 @@ export class AuthService {
         const user = await this.usersRepo.findById(userId);
 
         if (!user) {
-            throw new AppException(409, "INVALID_TOKEN", "Invalid token");
+            throw new AppException(409, "INVALID_TOKEN", );
         }
 
         return {
@@ -58,7 +58,7 @@ export class AuthService {
         const exists = await this.usersRepo.findByUsername(username);
 
         if (exists) {
-            throw new AppException(409, "USERNAME_TAKEN", "Username already taken");
+            throw new AppException(409, "USERNAME_TAKEN", );
         }
 
         const created = await this.usersService.createUserRecord({
