@@ -8,6 +8,7 @@ import {
     Injectable,
 } from "@nestjs/common";
 import { ErrorReportingService } from "../errors/error-reporting.service";
+import { sanitizeSensitiveFields } from "../utils/sanitize-sensitive-fields.util";
 
 function isProductionEnv() {
     return process.env.NODE_ENV === "production";
@@ -65,7 +66,7 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
 
         const requestBody =
             req?.body && typeof req.body === "object"
-                ? req.body
+                ? sanitizeSensitiveFields(req.body)
                 : null;
 
         await this.errorReportingService.report(exception, {
@@ -86,10 +87,8 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
             severity,
             kind,
             domain,
-
             path: req?.url,
             method: req?.method,
-
             name: showDebug ? exception?.name : undefined,
             stack: showDebug ? exception?.stack : undefined,
         };

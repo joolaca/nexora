@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
@@ -11,11 +11,12 @@ import {
     ApiUnauthorizedResponse,
     ApiBadRequestResponse,
 } from "@nestjs/swagger";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 
 @ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
-    constructor(private auth: AuthService) {}
+    constructor(private readonly auth: AuthService) {}
 
     @ApiOperation({
         summary: "Login",
@@ -48,8 +49,8 @@ export class AuthController {
     @ApiUnauthorizedResponse({ description: "Missing, invalid, or expired token." })
     @UseGuards(JwtAuthGuard)
     @Get("me")
-    me(@Req() req: any) {
-        return this.auth.getMe(req.user.userId);
+    me(@CurrentUser() user: { userId: string }) {
+        return this.auth.getMe(user.userId);
     }
 
     @ApiOperation({

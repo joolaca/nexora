@@ -1,12 +1,11 @@
-// backend/src/users/tests/auth.login.integration.spec.ts
+// backend/src/auth/tests/auth.login.integration.spec.ts
 // npx jest auth.login.integration.spec.ts --runInBand
 
 import request from "supertest";
-import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import { AppModule } from "../../app.module";
 import { UsersBuilderService } from "../../users/users-builder.service";
-import {UserRole} from "../../users/user-role.enum";
+import { UserRole } from "../../users/user-role.enum";
+import { createTestApp } from "../../helpers/test-app.helper";
 
 describe("Auth (integration) /auth/login", () => {
     let app: INestApplication;
@@ -15,14 +14,9 @@ describe("Auth (integration) /auth/login", () => {
     const createdUserIds: string[] = [];
 
     beforeAll(async () => {
-        const modRef = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-
-        app = modRef.createNestApplication();
-        await app.init();
-
-        usersFixtureService = modRef.get(UsersBuilderService);
+        const testApp = await createTestApp();
+        app = testApp.app;
+        usersFixtureService = testApp.modRef.get(UsersBuilderService);
     });
 
     afterEach(async () => {
@@ -36,10 +30,10 @@ describe("Auth (integration) /auth/login", () => {
     });
 
     it("POST /auth/login -> should login with a valid username and password", async () => {
-        const plainPassword = "secret123"
+        const plainPassword = "secret123";
         const createdUser = await usersFixtureService.createTestUser({
-            username: "login_test_user_"+Math.floor(Math.random() * 10000000000),
-            plainPassword: plainPassword,
+            username: "login_test_user_" + Math.floor(Math.random() * 10000000000),
+            plainPassword,
             role: UserRole.ADMIN,
         });
 
@@ -83,6 +77,5 @@ describe("Auth (integration) /auth/login", () => {
             });
 
         expect(res.status).toBe(409);
-
     });
 });

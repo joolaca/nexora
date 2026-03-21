@@ -1,5 +1,5 @@
 // backend/src/users/users.controller.ts
-import { Body, Controller, Get, Patch, Query, Req, UseGuards, BadRequestException } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { UpdateMeDto } from "./dto/update-me.dto";
@@ -15,6 +15,8 @@ import {
     ApiTags,
     ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
+import { AppException } from "../common/errors/app-exception";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
 
 @ApiTags("Users")
 @ApiBearerAuth("access-token")
@@ -33,13 +35,17 @@ export class UsersController {
     @ApiConflictResponse({ description: "Username already taken." })
     @ApiForbiddenResponse({ description: "Not allowed." })
     @Patch("me")
-    async updateMe(@Req() req: any, @Body() dto: UpdateMeDto) {
+    async updateMe(
+        @CurrentUser() user: { userId: string },
+        @Body() dto: UpdateMeDto,
+    ) {
         if (!dto.newUsername && !dto.newPassword) {
-            throw new BadRequestException("Nothing to update");
+            throw new AppException(400, "NOTHING_TO_UPDATE", {
+                kind: "validation",
+            });
         }
 
-        const userId = req.user.userId;
-        return this.users.updateMe(userId, dto);
+        return this.users.updateMe(user.userId, dto);
     }
 
     @ApiOperation({
@@ -48,7 +54,6 @@ export class UsersController {
     })
     @ApiOkResponse({ description: "Paginated users list." })
     @ApiBadRequestResponse({ description: "Invalid query parameters." })
-    // Swagger-friendly query docs (shows up nicely in UI)
     @ApiQuery({ name: "limit", required: false, type: Number, example: 20, description: "Page size (1-100)." })
     @ApiQuery({ name: "page", required: false, type: Number, example: 1, description: "Page number (>= 1)." })
     @ApiQuery({

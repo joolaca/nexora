@@ -1,10 +1,5 @@
 // backend/src/users/users.service.ts
-import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import * as bcrypt from "bcryptjs";
 import { UpdateMeDto } from "./dto/update-me.dto";
 import { UsersRepository } from "./users.repository";
@@ -38,7 +33,7 @@ export class UsersService {
         const user = await this.usersRepo.findById(id);
 
         if (!user) {
-            throw new AppException(404, "USER_NOT_FOUND", );
+            throw new AppException(404, "USER_NOT_FOUND");
         }
 
         return user;
@@ -57,12 +52,11 @@ export class UsersService {
     }
 
     async createUserRecord(input: CreateUserInput) {
-
         const normalizedUsername = input.username.trim().toLowerCase();
         const exists = await this.usersRepo.existsByUsername(normalizedUsername);
 
         if (exists) {
-            throw new ConflictException("Username already taken");
+            throw new AppException(409, "USERNAME_TAKEN");
         }
 
         const prepared = await this.buildCreateUserData({
@@ -93,13 +87,15 @@ export class UsersService {
         const user = await this.usersRepo.findById(userId);
 
         if (!user) {
-            throw new BadRequestException("User not found");
+            throw new AppException(404, "USER_NOT_FOUND");
         }
 
         const ok = await bcrypt.compare(dto.currentPassword, user.password);
 
         if (!ok) {
-            throw new UnauthorizedException("Invalid current password");
+            throw new AppException(401, "INVALID_CURRENT_PASSWORD", {
+                kind: "auth",
+            });
         }
 
         if (dto.newUsername) {
@@ -109,7 +105,7 @@ export class UsersService {
                 const exists = await this.usersRepo.existsByUsername(newUsername, String(user._id));
 
                 if (exists) {
-                    throw new ConflictException("Username already taken");
+                    throw new AppException(409, "USERNAME_TAKEN");
                 }
 
                 user.username = newUsername;

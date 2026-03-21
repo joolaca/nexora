@@ -5,6 +5,7 @@ import { Model } from "mongoose";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { AppException } from "./app-exception";
 import { ErrorLog, ErrorLogDocument } from "./error-log.schema";
+import { sanitizeSensitiveFields } from "../utils/sanitize-sensitive-fields.util";
 
 export type ErrorReportContext = {
     path?: string;
@@ -166,6 +167,10 @@ export class ErrorReportingService {
             reportContext.actorUserId ??
             (meta.context?.actorUserId ? String(meta.context.actorUserId) : null);
 
+        const sanitizedRequestBody = reportContext.requestBody
+            ? sanitizeSensitiveFields(reportContext.requestBody)
+            : null;
+
         const payload = {
             statusCode,
             errorCode,
@@ -179,7 +184,7 @@ export class ErrorReportingService {
             method: reportContext.method ?? null,
             actorUserId,
             params: meta.params ?? {},
-            requestBody: reportContext.requestBody ?? null,
+            requestBody: sanitizedRequestBody,
             context: meta.context ?? {},
             stack: reportContext.stack ?? null,
             environment: process.env.NODE_ENV ?? null,

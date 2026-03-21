@@ -1,20 +1,15 @@
 //backend/src/users/tests/users.smoke.integration.spec.ts
 //npx jest users.smoke.integration.spec.ts --runInBand
 import request from "supertest";
-import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import { AppModule } from "../../app.module";
+import { createTestApp } from "../../helpers/test-app.helper";
 
 describe("Users (smoke) /users", () => {
     let app: INestApplication;
 
     beforeAll(async () => {
-        const modRef = await Test.createTestingModule({
-            imports: [AppModule],
-        }).compile();
-
-        app = modRef.createNestApplication();
-        await app.init();
+        const testApp = await createTestApp();
+        app = testApp.app;
     });
 
     afterAll(async () => {
@@ -25,10 +20,9 @@ describe("Users (smoke) /users", () => {
         const res = await request(app.getHttpServer()).get("/users");
 
         expect(res.status).toBe(401);
-
-        expect(res.body).toMatchObject({
-            statusCode: 401,
-            message: "Unauthorized",
+        expect(res.body.error).toMatchObject({
+            errorCode: "AUTH_UNAUTHORIZED",
+            kind: "auth",
         });
     });
 });
