@@ -1,4 +1,41 @@
 {
+  "menu": {
+    "title": "Clan",
+    "overview": "My clan",
+    "requests": "Invitations"
+  },
+  "overview": {
+    "shared": {
+      "title": "Clan",
+      "noClanYet": "You are not in a clan yet.",
+      "inClanAs": "Your clan",
+      "myRole": "Your role"
+    },
+    "create": {
+      "title": "Create clan",
+      "name": "Clan name",
+      "namePh": "e.g. Night Owls",
+      "slug": "Clan tag (slug)",
+      "slugPh": "optional, e.g. night-owls",
+      "slugHelp": "Letters, numbers, dash. If empty, it will be generated from the name.",
+      "submit": "Create clan",
+      "submitting": "Creating...",
+      "success": "Clan created ✅",
+      "failed": "Failed to create clan"
+    },
+    "edit": {
+      "title": "Edit clan",
+      "hint": "Only users with permission can edit clan data.",
+      "name": "Clan name",
+      "namePh": "Leave empty if unchanged",
+      "slug": "Clan tag (slug)",
+      "slugPh": "Leave empty if unchanged",
+      "submit": "Save clan changes",
+      "submitting": "Saving...",
+      "success": "Saved ✅",
+      "failed": "Failed to update clan"
+    }
+  },
   "invite": {
     "buttonNext": "Invite to my clan (next step)",
     "buttonInviting": "Sending invite...",
@@ -7,11 +44,6 @@
     "userNoClan": "Not in a clan.",
     "success": "Invite sent.",
     "error": "Failed to send invite."
-  },
-  "menu": {
-    "title": "Clan",
-    "overview": "My clan",
-    "requests": "Invitations"
   },
   "request": {
     "title": "My invitations",

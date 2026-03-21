@@ -10,13 +10,12 @@ type Props = {
 };
 
 export function ClanEditCard({ clan }: Props) {
-    const { t } = useTranslation();
+    const { t } = useTranslation("clan");
     const edit = useEditClan();
 
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
 
-    // ✅ Prefill: amikor betölt a clans, töltsük fel a mezőket (de ne írjuk felül, ha user már gépelt)
     useEffect(() => {
         setName((prev) => (prev ? prev : clan.name));
         setSlug((prev) => (prev ? prev : clan.slug));
@@ -25,8 +24,8 @@ export function ClanEditCard({ clan }: Props) {
     const canSubmit = useMemo(() => {
         const nameTrim = name.trim();
         const slugTrim = slug.trim();
-        // csak akkor engedjük, ha tényleg változott valami
         const changed = nameTrim !== clan.name || slugTrim !== clan.slug;
+
         return changed && !edit.isPending;
     }, [name, slug, clan.name, clan.slug, edit.isPending]);
 
@@ -42,35 +41,59 @@ export function ClanEditCard({ clan }: Props) {
         });
     };
 
-    const errMsg = edit.isError ? translateApiError(edit.error, t, "clan.editFailed") : "";
+    const errMsg = edit.isError
+        ? translateApiError(edit.error, t, "overview.edit.failed")
+        : "";
 
     return (
         <div className="card shadow-sm">
             <div className="card-body">
-                <h3 className="h5 mb-2">{t("clan.editTitle")}</h3>
+                <h3 className="h5 mb-2">{t("overview.edit.title")}</h3>
+
+                <div className="text-muted small mb-2">
+                    {t("overview.shared.inClanAs")} <strong>{clan.name}</strong> ({clan.slug}) —{" "}
+                    {t("overview.shared.myRole")}: <strong>{clan.myRole}</strong>
+                </div>
 
                 <div className="text-muted small mb-3">
-                    {t("clan.inClanAs")} <strong>{clan.name}</strong> ({clan.slug}) — {t("clan.myRole")}:{" "}
-                    <strong>{clan.myRole}</strong>
+                    {t("overview.edit.hint")}
                 </div>
 
                 <form onSubmit={onSubmit}>
                     <div className="mb-3">
-                        <label className="form-label">{t("clan.editName")}</label>
-                        <input className="form-control" value={name} onChange={(e) => setName(e.target.value)} />
+                        <label className="form-label">{t("overview.edit.name")}</label>
+                        <input
+                            className="form-control"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder={t("overview.edit.namePh")}
+                        />
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">{t("clan.editSlug")}</label>
-                        <input className="form-control" value={slug} onChange={(e) => setSlug(e.target.value)} />
+                        <label className="form-label">{t("overview.edit.slug")}</label>
+                        <input
+                            className="form-control"
+                            value={slug}
+                            onChange={(e) => setSlug(e.target.value)}
+                            placeholder={t("overview.edit.slugPh")}
+                        />
                     </div>
 
-                    {edit.isError && <div className="alert alert-danger py-2">{errMsg}</div>}
+                    {edit.isError && (
+                        <div className="alert alert-danger py-2">{errMsg}</div>
+                    )}
 
-                    {edit.isSuccess && <div className="alert alert-success py-2">{t("clan.editSuccess")}</div>}
+                    {edit.isSuccess && (
+                        <div className="alert alert-success py-2">
+                            {t("overview.edit.success")}
+                        </div>
+                    )}
 
                     <button className="btn btn-outline-primary" type="submit" disabled={!canSubmit}>
-                        {edit.isPending ? t("clan.editSaving") : t("clan.editSave")}
+                        {edit.isPending
+                            ? t("overview.edit.submitting")
+                            : t("overview.edit.submit")}
                     </button>
                 </form>
             </div>

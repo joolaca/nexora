@@ -10,14 +10,13 @@ function isApiError(err: unknown): err is ApiError {
 }
 
 export function ClanOverviewPage() {
-    const { t } = useTranslation();
+    const { t } = useTranslation("clan");
     const myClan = useMyClan();
 
     if (myClan.isLoading) {
-        return <div className="text-muted">{t("common.loading")}</div>;
+        return <div className="text-muted">{t("common.loading", { ns: "common" })}</div>;
     }
 
-    // Ha a backend 404-gyel vagy CLAN_NOT_FOUND kóddal jelzi, hogy nincs klán:
     if (myClan.isError) {
         if (isApiError(myClan.error)) {
             const status = myClan.error.statusCode;
@@ -34,7 +33,11 @@ export function ClanOverviewPage() {
             }
         }
 
-        return <div className="alert alert-danger">{t("common.errorGeneric")}</div>;
+        return (
+            <div className="alert alert-danger">
+                {t("common.errorGeneric", { ns: "common" })}
+            </div>
+        );
     }
 
     const clan = myClan.data;

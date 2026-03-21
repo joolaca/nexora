@@ -1,4 +1,41 @@
 {
+  "menu": {
+    "title": "Klán",
+    "overview": "Saját klán",
+    "requests": "Meghívók"
+  },
+  "overview": {
+    "shared": {
+      "title": "Klán",
+      "noClanYet": "Még nem vagy klánban.",
+      "inClanAs": "Klánod",
+      "myRole": "Szerepköröd"
+    },
+    "create": {
+      "title": "Klán létrehozása",
+      "name": "Klán neve",
+      "namePh": "pl. Éjjeli Baglyok",
+      "slug": "Klán azonosító (slug)",
+      "slugPh": "opcionális, pl. ejjeli-baglyok",
+      "slugHelp": "Betű, szám, kötőjel. Ha üres, a névből generáljuk.",
+      "submit": "Klán létrehozása",
+      "submitting": "Létrehozás...",
+      "success": "Klán létrehozva ✅",
+      "failed": "Nem sikerült létrehozni a klánt"
+    },
+    "edit": {
+      "title": "Klán szerkesztése",
+      "hint": "Csak jogosultsággal rendelkező tag szerkesztheti a klán adatait.",
+      "name": "Klán neve",
+      "namePh": "Hagyd üresen, ha nem változik",
+      "slug": "Klán azonosító (slug)",
+      "slugPh": "Hagyd üresen, ha nem változik",
+      "submit": "Klán mentése",
+      "submitting": "Mentés...",
+      "success": "Mentve ✅",
+      "failed": "Nem sikerült módosítani a klánt"
+    }
+  },
   "invite": {
     "buttonNext": "Meghívás a klánomba",
     "buttonInviting": "Meghívó küldése...",
@@ -7,11 +44,6 @@
     "userNoClan": "Nincs klánban.",
     "success": "Meghívó elküldve.",
     "error": "Nem sikerült meghívót küldeni."
-  },
-  "menu": {
-    "title": "Klán",
-    "overview": "Saját klán",
-    "requests": "Meghívók"
   },
   "request": {
     "title": "Meghívóim",
