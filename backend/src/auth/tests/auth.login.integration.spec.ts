@@ -6,6 +6,7 @@ import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import { AppModule } from "../../app.module";
 import { UsersBuilderService } from "../../users/users-builder.service";
+import {UserRole} from "../../users/user-role.enum";
 
 describe("Auth (integration) /auth/login", () => {
     let app: INestApplication;
@@ -37,8 +38,9 @@ describe("Auth (integration) /auth/login", () => {
     it("POST /auth/login -> should login with a valid username and password", async () => {
         const plainPassword = "secret123"
         const createdUser = await usersFixtureService.createTestUser({
-            username: "login_test_user_1",
+            username: "login_test_user_"+Math.floor(Math.random() * 10000000000),
             plainPassword: plainPassword,
+            role: UserRole.ADMIN,
         });
 
         createdUserIds.push(createdUser.id);

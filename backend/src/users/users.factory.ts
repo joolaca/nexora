@@ -1,6 +1,7 @@
 // backend/src/users/users.factory.ts
 import { Injectable } from "@nestjs/common";
 import { CreateUserInput, CreateUserOverrides } from "./users.types";
+import { UserRole } from "./user-role.enum";
 
 @Injectable()
 export class UsersFactory {
@@ -35,12 +36,13 @@ export class UsersFactory {
         return texts[Math.floor(Math.random() * texts.length)];
     }
 
-    buildCreateUserInput(overrides: CreateUserOverrides = {}): CreateUserInput {
+    buildCreateUserInput(overrides: CreateUserOverrides = {}): CreateUserInput & { role?: UserRole } {
         return {
             username: overrides.username ?? this.generateUsername(),
             plainPassword: overrides.plainPassword ?? this.generatePassword(),
             rank: overrides.rank ?? this.generateRank(),
             about: overrides.about ?? this.generateAbout(),
+            role: overrides.role ?? UserRole.USER,
         };
     }
 }

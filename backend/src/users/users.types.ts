@@ -1,4 +1,5 @@
 // backend/src/users/users.types.ts
+import { UserRole } from "./user-role.enum";
 
 export type CreateUserInput = {
     username: string;
@@ -7,12 +8,14 @@ export type CreateUserInput = {
     about?: string;
 };
 
-export type CreateUserOverrides = Partial<CreateUserInput>;
-
+export type CreateUserOverrides = Partial<CreateUserInput> & {
+    role?: UserRole;
+};
 
 export type CreateUserDbParams = {
     username: string;
     passwordHash: string;
+    role?: UserRole;
     rank?: number;
     about?: string;
 };

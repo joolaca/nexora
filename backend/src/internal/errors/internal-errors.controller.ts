@@ -1,5 +1,4 @@
 // backend/src/internal/errors/internal-errors.controller.ts
-
 import {
     Controller,
     Get,
@@ -8,6 +7,7 @@ import {
     Post,
     Patch,
     Body,
+    UseGuards,
 } from "@nestjs/common";
 import { AppException } from "../../common/errors/app-exception";
 import {
@@ -16,9 +16,18 @@ import {
     ApiQuery,
     ApiBody,
     ApiResponse,
+    ApiBearerAuth,
+    ApiForbiddenResponse,
+    ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
+import { AdminGuard } from "../../auth/admin.guard";
 
 @ApiTags("internal-errors")
+@ApiBearerAuth("access-token")
+@ApiUnauthorizedResponse({ description: "Missing, invalid, or expired token." })
+@ApiForbiddenResponse({ description: "Admin role required." })
+@UseGuards(JwtAuthGuard, AdminGuard)
 @Controller("internal/errors")
 export class InternalErrorsController {
 
@@ -47,7 +56,6 @@ export class InternalErrorsController {
         description: "System error triggered",
     })
     testError(@Query("type") type?: string) {
-
         if (type === "app") {
             throw new AppException(HttpStatus.BAD_REQUEST, "TEST_APP_ERROR", {
                 message: "This is a test AppException",

@@ -16,6 +16,7 @@ import {
 } from "./users.list.repository";
 import { ClanOverviewService } from "../clans/overview/clan-overview.service";
 import { AppException } from "../common/errors/app-exception";
+import { UserRole } from "./user-role.enum";
 
 @Injectable()
 export class UsersService {
@@ -43,16 +44,20 @@ export class UsersService {
         return user;
     }
 
-    async buildCreateUserData(input: CreateUserInput): Promise<CreateUserDbParams> {
+    async buildCreateUserData(
+        input: CreateUserInput & { role?: UserRole },
+    ): Promise<CreateUserDbParams> {
         return {
             username: input.username.trim().toLowerCase(),
             passwordHash: await bcrypt.hash(input.plainPassword, 10),
+            role: input.role ?? UserRole.USER,
             rank: input.rank,
             about: input.about?.trim(),
         };
     }
 
     async createUserRecord(input: CreateUserInput) {
+
         const normalizedUsername = input.username.trim().toLowerCase();
         const exists = await this.usersRepo.existsByUsername(normalizedUsername);
 

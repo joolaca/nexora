@@ -40,6 +40,7 @@ export class UsersRepository {
             password: params.passwordHash,
             rank: params.rank,
             about: params.about,
+            role: params.role,
         });
     }
 

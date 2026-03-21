@@ -1,18 +1,19 @@
 // backend/src/seed/seed.service.ts
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import { Clan, ClanDocument } from "../clans/core/clans.schema";
-import { User, UserDocument } from "../users/users.schema";
-import { seedClans, assignUsersToClans } from "../clans/core/clans.seed";
-import { UsersBuilderService } from "../users/users-builder.service";
+import {Injectable, Logger} from "@nestjs/common";
+import {InjectModel} from "@nestjs/mongoose";
+import {Model} from "mongoose";
+import {Clan, ClanDocument} from "../clans/core/clans.schema";
+import {User, UserDocument} from "../users/users.schema";
+import {assignUsersToClans, seedClans} from "../clans/core/clans.seed";
+import {UsersBuilderService} from "../users/users-builder.service";
+import {UserRole} from "../users/user-role.enum";
 
 @Injectable()
 export class SeedService {
     private readonly logger = new Logger(SeedService.name);
 
     constructor(
-        private readonly usersFixtureService: UsersBuilderService,
+        private readonly usersBuilderService: UsersBuilderService,
         @InjectModel(Clan.name) private readonly clanModel: Model<ClanDocument>,
         @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     ) {}
@@ -36,14 +37,26 @@ export class SeedService {
         // 2) Users
         const count = 150;
 
-        const createdUsers = await Promise.all(
-            Array.from({ length: count }, (_, index) =>
-                this.usersFixtureService.createTestUser({
-                    username: `user${index + 1}`,
-                    plainPassword: "123",
-                }),
-            ),
-        );
+        const createdUsers: any[] = [];
+
+    // 1) Admin user
+        const adminUser = await this.usersBuilderService.createTestUser({
+            username: "user1",
+            plainPassword: "123",
+            role: UserRole.ADMIN,
+        });
+
+        createdUsers.push(adminUser);
+
+        // 2) Többi user
+        for (let i = createdUsers.length +1 ; i < count; i++) {
+            const user = await this.usersBuilderService.createTestUser({
+                username: `user${i}`,
+                plainPassword: "123",
+            });
+
+            createdUsers.push(user);
+        }
 
         // 3) Assign
         const assignRes = await assignUsersToClans({
