@@ -1,3 +1,4 @@
+// backend/src/common/errors/error-reporting.service.ts
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
@@ -9,8 +10,8 @@ export type ErrorReportContext = {
     path?: string;
     method?: string;
     actorUserId?: string | null;
-    thrownAt?: string | null;
     stack?: string | null;
+    requestBody?: Record<string, any> | null;
 };
 
 type ExtractedErrorMeta = {
@@ -63,16 +64,16 @@ export class ErrorReportingService {
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    getCode(exception: unknown): string | null {
+    getErrorCode(exception: unknown): string | null {
         if (exception instanceof AppException) {
-            return exception.code ?? null;
+            return exception.errorCode ?? null;
         }
 
         if (exception instanceof HttpException) {
             const response = exception.getResponse();
 
-            if (response && typeof response === "object" && "code" in response) {
-                return String((response as any).code ?? null);
+            if (response && typeof response === "object" && "errorCode" in response) {
+                return String((response as any).errorCode ?? null);
             }
         }
 
@@ -155,7 +156,7 @@ export class ErrorReportingService {
         const shouldPersist = this.shouldPersist(exception);
 
         const statusCode = this.getStatusCode(exception);
-        const code = this.getCode(exception);
+        const errorCode = this.getErrorCode(exception);
         const message = this.getMessage(exception);
         const name = this.getName(exception);
 
@@ -167,7 +168,7 @@ export class ErrorReportingService {
 
         const payload = {
             statusCode,
-            code,
+            errorCode,
             message,
             name,
             severity: meta.severity,
@@ -178,8 +179,8 @@ export class ErrorReportingService {
             method: reportContext.method ?? null,
             actorUserId,
             params: meta.params ?? {},
+            requestBody: reportContext.requestBody ?? null,
             context: meta.context ?? {},
-            thrownAt: reportContext.thrownAt ?? null,
             stack: reportContext.stack ?? null,
             environment: process.env.NODE_ENV ?? null,
         };

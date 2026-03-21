@@ -10,6 +10,7 @@ import { envValidationSchema } from "./config/env.validation";
 import { APP_FILTER } from "@nestjs/core";
 import { ErrorsModule } from "./common/errors/errors.module";
 import { GlobalHttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { InternalModule } from "./internal/internal.module";
 
 @Module({
     imports: [
@@ -36,6 +37,7 @@ import { GlobalHttpExceptionFilter } from "./common/filters/http-exception.filte
         }),
 
         ErrorsModule,
+        InternalModule,
         UsersModule,
         AuthModule,
         ClansModule,

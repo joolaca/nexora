@@ -1,3 +1,4 @@
+//backend/src/common/filters/http-exception.filter.ts
 import {
     ArgumentsHost,
     Catch,
@@ -10,21 +11,6 @@ import { ErrorReportingService } from "../errors/error-reporting.service";
 
 function isProductionEnv() {
     return process.env.NODE_ENV === "production";
-}
-
-function extractThrownAt(stack?: string): string | null {
-    if (!stack) return null;
-
-    const lines = stack.split("\n").map((l) => l.trim());
-    const frameLines = lines.filter((l) => l.startsWith("at "));
-
-    const preferred =
-        frameLines.find((l) => l.includes("/src/")) ||
-        frameLines.find((l) => l.includes("\\src\\")) ||
-        frameLines.find((l) => !l.includes("node_modules")) ||
-        frameLines[0];
-
-    return preferred ?? null;
 }
 
 @Injectable()
@@ -48,7 +34,7 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
         const responseBody = isHttp ? exception.getResponse() : null;
 
         let message: any = exception?.message ?? "Internal error";
-        let code: string | undefined;
+        let errorCode: string | undefined;
         let params: Record<string, any> | undefined;
         let context: Record<string, any> | undefined;
         let severity: string | undefined;
@@ -61,7 +47,7 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
             const rb = responseBody as Record<string, any>;
 
             message = rb.message ?? message;
-            code = rb.code;
+            errorCode = rb.errorCode;
             params = rb.params;
             context = rb.context;
             severity = rb.severity;
@@ -70,7 +56,6 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
         }
 
         const showDebug = !isProductionEnv();
-        const thrownAt = showDebug ? extractThrownAt(exception?.stack) : null;
         const stack = showDebug ? exception?.stack : undefined;
 
         const actorUserId =
@@ -78,18 +63,24 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
             context?.actorUserId ??
             null;
 
+        const requestBody =
+            req?.body && typeof req.body === "object"
+                ? req.body
+                : null;
+
         await this.errorReportingService.report(exception, {
             path: req?.url,
             method: req?.method,
             actorUserId,
-            thrownAt,
             stack,
+            requestBody,
         });
 
         const error = {
             statusCode: status,
-            code,
+            errorCode,
             params,
+            requestBody: showDebug ? requestBody : undefined,
             context,
             message,
             severity,
@@ -100,7 +91,6 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
             method: req?.method,
 
             name: showDebug ? exception?.name : undefined,
-            thrownAt: showDebug ? thrownAt : undefined,
             stack: showDebug ? exception?.stack : undefined,
         };
 

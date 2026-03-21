@@ -13,7 +13,7 @@ export class ErrorLog {
     statusCode!: number;
 
     @Prop({ type: String, default: null, index: true })
-    code!: string | null;
+    errorCode!: string | null;
 
     @Prop({ required: true })
     message!: string;
@@ -45,17 +45,18 @@ export class ErrorLog {
     @Prop({ type: SchemaTypes.Mixed, default: {} })
     params!: Record<string, any>;
 
+    @Prop({ type: SchemaTypes.Mixed, default: null })
+    requestBody!: Record<string, any> | null;
+
     @Prop({ type: SchemaTypes.Mixed, default: {} })
     context!: Record<string, any>;
-
-    @Prop({ type: String, default: null })
-    thrownAt!: string | null;
 
     @Prop({ type: String, default: null })
     stack!: string | null;
 
     @Prop({ type: String, default: null, index: true })
     environment!: string | null;
+
 }
 
 export const ErrorLogSchema = SchemaFactory.createForClass(ErrorLog);

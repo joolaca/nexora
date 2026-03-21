@@ -31,8 +31,8 @@ export type AppExceptionOptions = {
     shouldPersist?: boolean;
 };
 
-function defaultMessageFromCode(code: ErrorCode): string {
-    return code
+function defaultMessageFromCode(errorCode: ErrorCode): string {
+    return errorCode
         .toLowerCase()
         .split("_")
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -40,15 +40,15 @@ function defaultMessageFromCode(code: ErrorCode): string {
 }
 
 export class AppException extends HttpException {
-    readonly code: ErrorCode;
+    readonly errorCode: ErrorCode;
     readonly meta: AppExceptionMeta;
 
     constructor(
         status: HttpStatus,
-        code: ErrorCode,
+        errorCode: ErrorCode,
         options?: AppExceptionOptions,
     ) {
-        const resolvedMessage = options?.message ?? defaultMessageFromCode(code);
+        const resolvedMessage = options?.message ?? defaultMessageFromCode(errorCode);
 
         const meta: AppExceptionMeta = {
             severity: options?.severity ?? (status >= 500 ? "error" : "warn"),
@@ -64,7 +64,7 @@ export class AppException extends HttpException {
 
         super(
             {
-                code,
+                errorCode,
                 message: resolvedMessage,
                 params: meta.params,
                 context: meta.context,
@@ -75,7 +75,7 @@ export class AppException extends HttpException {
             status,
         );
 
-        this.code = code;
+        this.errorCode = errorCode;
         this.meta = meta;
     }
 }
