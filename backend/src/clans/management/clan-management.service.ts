@@ -1,4 +1,3 @@
-// backend/src/clans/management/clan-management.service.ts
 import { Injectable } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection } from "mongoose";
@@ -20,6 +19,10 @@ function slugify(input: string) {
         .slice(0, 32);
 }
 
+function isMongoDuplicateKeyError(error: any): boolean {
+    return !!error && typeof error === "object" && error.code === 11000;
+}
+
 @Injectable()
 export class ClanManagementService {
     constructor(
@@ -28,6 +31,17 @@ export class ClanManagementService {
         private readonly usersRepo: UsersRepository,
         private readonly clanRequestRepo: ClanRequestRepository,
     ) {}
+
+    private mapClanCreateResult(clan: any) {
+        const ownerMember = clan.members.find((x: any) => x.roleKey === "owner");
+
+        return {
+            id: String(clan._id),
+            name: clan.name,
+            slug: clan.slug,
+            myRole: ownerMember?.roleKey ?? "owner",
+        };
+    }
 
     private getMemberRoleKey(clan: any, userId: string): string | null {
         const member = clan.members.find((x: any) => String(x.userId) === String(userId));
@@ -50,21 +64,34 @@ export class ClanManagementService {
         return role.permissions.includes(permission);
     }
 
-    async createClan(ownerUserId: string, dto: CreateClanDto) {
+    async createClan(ownerUserId: string, dto: CreateClanDto, idempotencyKey?: string) {
+        const normalizedKey = idempotencyKey?.trim() || undefined;
+
+        if (normalizedKey) {
+            const existingByRequest = await this.clanManagementRepo.findByCreateRequest(
+                ownerUserId,
+                normalizedKey,
+            );
+
+            if (existingByRequest) {
+                return this.mapClanCreateResult(existingByRequest);
+            }
+        }
+
         const slug = dto.slug?.trim().toLowerCase() || slugify(dto.name);
 
         if (!slug) {
-            throw new AppException(409, "INVALID_CLAN_SLUG", );
+            throw new AppException(409, "INVALID_CLAN_SLUG");
         }
 
         const ownerUser = await this.usersRepo.findById(ownerUserId);
 
         if (!ownerUser) {
-            throw new AppException(404, "USER_NOT_FOUND", );
+            throw new AppException(404, "USER_NOT_FOUND");
         }
 
         if (ownerUser.clanId) {
-            throw new AppException(409, "USER_ALREADY_IN_CLAN", );
+            throw new AppException(409, "USER_ALREADY_IN_CLAN");
         }
 
         const exists = await this.clanManagementRepo.existsBySlug(slug);
@@ -84,6 +111,7 @@ export class ClanManagementService {
                     slug,
                     ownerUserId,
                     roles: BaseRoles,
+                    requestId: normalizedKey,
                 },
                 session,
             );
@@ -92,14 +120,21 @@ export class ClanManagementService {
 
             await session.commitTransaction();
 
-            return {
-                id: String(created._id),
-                name: created.name,
-                slug: created.slug,
-                myRole: "owner",
-            };
+            return this.mapClanCreateResult(created);
         } catch (error) {
             await session.abortTransaction();
+
+            if (normalizedKey && isMongoDuplicateKeyError(error)) {
+                const existingByRequest = await this.clanManagementRepo.findByCreateRequest(
+                    ownerUserId,
+                    normalizedKey,
+                );
+
+                if (existingByRequest) {
+                    return this.mapClanCreateResult(existingByRequest);
+                }
+            }
+
             throw error;
         } finally {
             await session.endSession();
@@ -108,23 +143,23 @@ export class ClanManagementService {
 
     async editClan(userId: string, dto: EditClanDto) {
         if (!dto.name && !dto.slug) {
-            throw new AppException(400, "NOTHING_TO_UPDATE", );
+            throw new AppException(400, "NOTHING_TO_UPDATE");
         }
 
         const clan = await this.clanManagementRepo.findByMemberUserId(userId);
 
         if (!clan) {
-            throw new AppException(404, "CLAN_NOT_FOUND", );
+            throw new AppException(404, "CLAN_NOT_FOUND");
         }
 
         const member = clan.members.find((m: any) => String(m.userId) === String(userId));
 
         if (!member) {
-            throw new AppException(403, "NOT_CLAN_MEMBER", );
+            throw new AppException(403, "NOT_CLAN_MEMBER");
         }
 
         if (!this.hasPermission(clan, userId, ClanPermissions.Edit)) {
-            throw new AppException(403, "NO_PERMISSION", );
+            throw new AppException(403, "NO_PERMISSION");
         }
 
         if (dto.name) {
@@ -135,14 +170,14 @@ export class ClanManagementService {
             const newSlug = dto.slug.trim().toLowerCase();
 
             if (!newSlug) {
-                throw new AppException(409, "INVALID_CLAN_SLUG", );
+                throw new AppException(409, "INVALID_CLAN_SLUG");
             }
 
             if (newSlug !== clan.slug) {
                 const exists = await this.clanManagementRepo.existsBySlug(newSlug, String(clan._id));
 
                 if (exists) {
-                    throw new AppException(409, "CLAN_SLUG_TAKEN", );
+                    throw new AppException(409, "CLAN_SLUG_TAKEN");
                 }
 
                 clan.slug = newSlug;

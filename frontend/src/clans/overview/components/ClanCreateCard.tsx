@@ -1,8 +1,8 @@
-// src/clans/overview/components/ClanCreateCard.tsx
 import { FormEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCreateClan } from "../hooks/overview.hooks";
 import { translateApiError } from "../../../i18n/translateApiError";
+import { createIdempotencyKey } from "../../../api/idempotency";
 
 export function ClanCreateCard() {
     const { t } = useTranslation("clan");
@@ -18,9 +18,14 @@ export function ClanCreateCard() {
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
 
+        const idempotencyKey = createIdempotencyKey("clan-create");
+
         create.mutate({
-            name: name.trim(),
-            slug: slug.trim() ? slug.trim() : undefined,
+            body: {
+                name: name.trim(),
+                slug: slug.trim() ? slug.trim() : undefined,
+            },
+            idempotencyKey,
         });
     };
 

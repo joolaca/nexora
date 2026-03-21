@@ -1,9 +1,25 @@
-// src/clans/overview/api/overview.api.ts
 import { apiFetch } from "../../../api/http";
-import type { ClanCreateRequest, ClanCreateResponse, ClanEditRequest, ClanEditResponse, ClanMeResponse } from "./overview.types";
+import type {
+    ClanCreateRequest,
+    ClanCreateResponse,
+    ClanEditRequest,
+    ClanEditResponse,
+    ClanMeResponse,
+} from "./overview.types";
 
-export function createClanApi(body: ClanCreateRequest) {
-    return apiFetch<ClanCreateResponse>("/clans", { method: "POST", body });
+export function createClanApi(params: {
+    body: ClanCreateRequest;
+    idempotencyKey: string;
+}) {
+    const { body, idempotencyKey } = params;
+
+    return apiFetch<ClanCreateResponse>("/clans", {
+        method: "POST",
+        body,
+        headers: {
+            "Idempotency-Key": idempotencyKey,
+        },
+    });
 }
 
 export function editClanApi(body: ClanEditRequest) {

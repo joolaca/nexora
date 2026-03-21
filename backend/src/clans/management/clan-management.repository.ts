@@ -1,4 +1,4 @@
-// backend/src/clans/management/clan-management.repository.ts
+//backend/src/clans/management/clan-management.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { ClientSession, Model, Types } from "mongoose";
@@ -9,6 +9,7 @@ export type CreateClanDbParams = {
     slug: string;
     ownerUserId: string;
     roles: ClanRole[];
+    requestId?: string;
 };
 
 @Injectable()
@@ -34,12 +35,27 @@ export class ClanManagementRepository {
         return q;
     }
 
+    async findByCreateRequest(ownerUserId: string, requestId: string, session?: ClientSession) {
+        const q = this.clanModel.findOne({
+            createdByUserId: new Types.ObjectId(ownerUserId),
+            requestId,
+        });
+
+        if (session) {
+            q.session(session);
+        }
+
+        return q.exec();
+    }
+
     async createClan(params: CreateClanDbParams, session?: ClientSession) {
         const [created] = await this.clanModel.create(
             [
                 {
                     name: params.name,
                     slug: params.slug,
+                    requestId: params.requestId,
+                    createdByUserId: new Types.ObjectId(params.ownerUserId),
                     roles: params.roles,
                     members: [
                         {

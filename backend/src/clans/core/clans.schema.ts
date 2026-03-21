@@ -1,4 +1,3 @@
-// backend/src/clans/clan.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 
@@ -35,6 +34,21 @@ export class Clan {
 
     @Prop({ type: [ClanMemberSchema], default: [] })
     members!: ClanMember[];
+
+    @Prop({ required: false, trim: true })
+    requestId?: string;
+
+    @Prop({ type: Types.ObjectId, required: false, index: true })
+    createdByUserId?: Types.ObjectId;
 }
 
 export const ClanSchema = SchemaFactory.createForClass(Clan);
+
+ClanSchema.index(
+    { createdByUserId: 1, requestId: 1 },
+    {
+        unique: true,
+        sparse: true,
+        name: "uniq_clan_create_request_per_user",
+    },
+);
