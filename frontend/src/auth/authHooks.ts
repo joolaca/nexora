@@ -19,6 +19,7 @@ export function useMe() {
         queryKey: authKeys.me,
         queryFn: meApi,
         enabled: !!token,
+        staleTime: 30_000,
 
         retry: (failureCount, error) => {
             const err = error as ApiError;
@@ -93,7 +94,7 @@ export function useAuth(): UseAuthResult {
     const user = (me.data ?? null) as AuthUser | null;
     const role = user?.role ?? null;
 
-    const isLoading = !!token && (me.isLoading || me.isFetching);
+    const isLoading = !!token && me.isLoading;
     const isAuthenticated = !!token && !!user;
     const isAdmin = role === "admin";
 

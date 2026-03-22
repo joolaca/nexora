@@ -16,7 +16,7 @@ export function RequireAuth() {
         return <Navigate to="/login" replace />;
     }
 
-    if (me.isLoading || me.isFetching) {
+    if (me.isLoading) {
         return <div style={{ padding: 24 }}>{t("common.loading")}</div>;
     }
 

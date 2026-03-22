@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { UserNameLink } from "../../user-details/UserNameLink";
 import { useInviteToClan } from "../../clans/requests/hooks/requests.hooks";
 import { useMyClan } from "../../clans/overview/hooks/overview.hooks";
+import { useNotify } from "../../notifications/useNotify";
 
 type Props = {
     users: UserListItem[];
@@ -12,6 +13,7 @@ type Props = {
 export function UsersTable({ users }: Props) {
     const { t } = useTranslation("user");
     const { t: tc } = useTranslation("clan");
+    const notify = useNotify();
 
     const { data: myClan } = useMyClan();
     const invite = useInviteToClan();
@@ -19,12 +21,25 @@ export function UsersTable({ users }: Props) {
     const canInvite = !!myClan?.id;
 
     const handleInvite = (userId: string) => {
-        if (!myClan?.id) return;
+        if (!myClan?.id) {
+            notify.error(tc("invite.disabledTitle"));
+            return;
+        }
 
-        invite.mutate({
-            clanId: myClan.id,
-            body: { userId },
-        });
+        invite.mutate(
+            {
+                clanId: myClan.id,
+                body: { userId },
+            },
+            {
+                onSuccess: () => {
+                    notify.success(tc("invite.success"));
+                },
+                onError: () => {
+                    notify.error(tc("invite.error"));
+                },
+            },
+        );
     };
 
     return (
@@ -63,6 +78,7 @@ export function UsersTable({ users }: Props) {
 
                             <td>
                                 <button
+                                    type="button"
                                     className="btn btn-sm btn-primary"
                                     onClick={() => handleInvite(u.id)}
                                     disabled={!canInvite || invite.isPending}
@@ -86,19 +102,6 @@ export function UsersTable({ users }: Props) {
                     </tbody>
                 </table>
             </div>
-
-            {/* TEMP feedback */}
-            {invite.isError && (
-                <div className="alert alert-danger m-2">
-                    {tc("invite.error")}
-                </div>
-            )}
-
-            {invite.isSuccess && (
-                <div className="alert alert-success m-2">
-                    {tc("invite.success")}
-                </div>
-            )}
         </div>
     );
 }
