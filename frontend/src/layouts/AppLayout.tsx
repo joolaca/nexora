@@ -1,5 +1,6 @@
+// src/layouts/AppLayout.tsx
 import { NavLink, Outlet } from "react-router-dom";
-import { useLogout } from "../auth/authHooks";
+import { useAuth } from "../auth/authHooks";
 import { useTranslation } from "react-i18next";
 import { setLanguage } from "../i18n/i18n";
 
@@ -8,7 +9,7 @@ function navLinkClass({ isActive }: { isActive: boolean }) {
 }
 
 export function AppLayout() {
-    const logout = useLogout();
+    const auth = useAuth();
     const { t, i18n } = useTranslation();
 
     const current = (i18n.language === "hu" ? "hu" : "en") as "hu" | "en";
@@ -58,6 +59,12 @@ export function AppLayout() {
                         </ul>
 
                         <div className="d-flex gap-2 align-items-center">
+                            {auth.user && (
+                                <span className="text-light small">
+                                    {auth.user.username} {auth.role ? `(${auth.role})` : ""}
+                                </span>
+                            )}
+
                             <select
                                 className="form-select form-select-sm"
                                 style={{ width: 140 }}
@@ -69,7 +76,7 @@ export function AppLayout() {
                                 <option value="en">English</option>
                             </select>
 
-                            <button className="btn btn-outline-light" onClick={logout}>
+                            <button className="btn btn-outline-light" onClick={auth.logout}>
                                 {t("nav.logout")}
                             </button>
                         </div>

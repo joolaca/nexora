@@ -1,7 +1,7 @@
+// src/pages/LoginPage.tsx
 import { FormEvent, useMemo, useState } from "react";
-import { useLogin } from "../auth/authHooks";
+import { useAuth, useLogin } from "../auth/authHooks";
 import { Navigate } from "react-router-dom";
-import { getToken } from "../auth/tokenStorage";
 import { useTranslation } from "react-i18next";
 import { translateApiError } from "../i18n/translateApiError";
 
@@ -9,18 +9,24 @@ const AUTH_FLASH_KEY = "auth_error_flash";
 
 export function LoginPage() {
     const { t } = useTranslation();
+    const auth = useAuth();
     const [username, setUsername] = useState("user1");
     const [password, setPassword] = useState("123");
     const login = useLogin();
 
-    // ✅ egyszer kiolvassuk (hogy ne maradjon bent)
     const flashError = useMemo(() => {
         const msg = sessionStorage.getItem(AUTH_FLASH_KEY);
         if (msg) sessionStorage.removeItem(AUTH_FLASH_KEY);
         return msg || "";
     }, []);
 
-    if (getToken()) return <Navigate to="/" replace />;
+    if (auth.isLoading) {
+        return <div className="text-center py-4">{t("common.loading")}</div>;
+    }
+
+    if (auth.isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -37,17 +43,29 @@ export function LoginPage() {
 
                 <form onSubmit={onSubmit}>
                     <div className="mb-3">
-                        <label className="form-label">{t("login.username")}</label>
-                        <input className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} />
+                        <label htmlFor="username" className="form-label">
+                            {t("login.username")}
+                        </label>
+                        <input
+                            id="username"
+                            className="form-control"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            autoComplete="username"
+                        />
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">{t("login.password")}</label>
+                        <label htmlFor="password" className="form-label">
+                            {t("login.password")}
+                        </label>
                         <input
+                            id="password"
                             className="form-control"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="current-password"
                         />
                     </div>
 

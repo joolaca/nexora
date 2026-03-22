@@ -1,15 +1,20 @@
 // src/auth/authApi.ts
 import { apiFetch } from "../api/http";
 
-export type LoginResponse = {
-    token: string;
-    user: { id: string; username: string };
-};
+export type UserRole = "admin" | "user";
 
-export type MeResponse = {
+export type AuthUser = {
     id: string;
     username: string;
+    role: UserRole;
 };
+
+export type LoginResponse = {
+    token: string;
+    user: AuthUser;
+};
+
+export type MeResponse = AuthUser;
 
 export type UpdateMeRequest = {
     currentPassword: string;
@@ -17,13 +22,13 @@ export type UpdateMeRequest = {
     newPassword?: string;
 };
 
-export type UpdateMeResponse = {
-    id: string;
-    username: string;
-};
+export type UpdateMeResponse = AuthUser;
 
 export function loginApi(username: string, password: string) {
-    return apiFetch<LoginResponse>("/auth/login", { method: "POST", body: { username, password } });
+    return apiFetch<LoginResponse>("/auth/login", {
+        method: "POST",
+        body: { username, password },
+    });
 }
 
 export function meApi() {
@@ -31,5 +36,8 @@ export function meApi() {
 }
 
 export function updateMeApi(body: UpdateMeRequest) {
-    return apiFetch<UpdateMeResponse>("/users/me", { method: "PATCH", body });
+    return apiFetch<UpdateMeResponse>("/users/me", {
+        method: "PATCH",
+        body,
+    });
 }

@@ -1,4 +1,4 @@
-//src/auth/RequireAuth.tsx
+// src/auth/RequireAuth.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { getToken, clearToken } from "./tokenStorage";
 import { useMe } from "./authHooks";
@@ -12,7 +12,9 @@ export function RequireAuth() {
     const token = getToken();
     const me = useMe();
 
-    if (!token) return <Navigate to="/login" replace />;
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
 
     if (me.isLoading || me.isFetching) {
         return <div style={{ padding: 24 }}>{t("common.loading")}</div>;
@@ -22,12 +24,7 @@ export function RequireAuth() {
         const err = me.error as ApiError;
 
         if (err?.statusCode >= 500 && err?.statusCode < 600) {
-            sessionStorage.setItem(
-                AUTH_FLASH_KEY,
-                err.message || t("login.failed") // ha nincs jobb kulcsod, ez jó alap
-            );
-            clearToken();
-            return <Navigate to="/login" replace />;
+            sessionStorage.setItem(AUTH_FLASH_KEY, err.message || t("login.failed"));
         }
 
         clearToken();

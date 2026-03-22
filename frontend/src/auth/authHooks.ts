@@ -1,6 +1,6 @@
 // src/auth/authHooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { loginApi, meApi, updateMeApi } from "./authApi";
+import { loginApi, meApi, updateMeApi, type AuthUser, type UserRole } from "./authApi";
 import { setToken, getToken, clearToken } from "./tokenStorage";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +33,7 @@ export function useMe() {
         },
 
         retryDelay: (attemptIndex) => {
-            const delay = 500 * Math.pow(2, attemptIndex); // 500,1000,2000,4000...
+            const delay = 500 * Math.pow(2, attemptIndex);
             return Math.min(delay, 8000);
         },
     });
@@ -43,7 +43,8 @@ export function useLogin() {
     const qc = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ username, password }: { username: string; password: string }) => loginApi(username, password),
+        mutationFn: ({ username, password }: { username: string; password: string }) =>
+            loginApi(username, password),
         onSuccess: async (data) => {
             setToken(data.token);
             await qc.invalidateQueries({ queryKey: authKeys.me });
@@ -68,7 +69,44 @@ export function useLogout() {
 
     return useCallback(() => {
         clearToken();
-        qc.removeQueries({ queryKey: ["auth", "me"] });
+        qc.removeQueries({ queryKey: authKeys.me });
         navigate("/login", { replace: true });
     }, [qc, navigate]);
+}
+
+type UseAuthResult = {
+    user: AuthUser | null;
+    role: UserRole | null;
+    isAuthenticated: boolean;
+    isAdmin: boolean;
+    isLoading: boolean;
+    isReady: boolean;
+    logout: () => void;
+    hasRole: (role: UserRole) => boolean;
+};
+
+export function useAuth(): UseAuthResult {
+    const token = getToken();
+    const me = useMe();
+    const logout = useLogout();
+
+    const user = (me.data ?? null) as AuthUser | null;
+    const role = user?.role ?? null;
+
+    const isLoading = !!token && (me.isLoading || me.isFetching);
+    const isAuthenticated = !!token && !!user;
+    const isAdmin = role === "admin";
+
+    const hasRole = (expectedRole: UserRole) => role === expectedRole;
+
+    return {
+        user,
+        role,
+        isAuthenticated,
+        isAdmin,
+        isLoading,
+        isReady: !isLoading,
+        logout,
+        hasRole,
+    };
 }

@@ -51,6 +51,7 @@ export class AuthService {
         return {
             id: String(user._id),
             username: user.username,
+            role: user.role
         };
     }
 
