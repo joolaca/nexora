@@ -12,6 +12,8 @@ import { ClanOverviewPage } from "../clans/overview/pages/ClanOverviewPage";
 import { ClanInvitesList } from "../clans/requests/components/ClanInvitesList";
 import { RequireRole } from "../auth/RequireRole";
 import { AdminPage } from "../admin/AdminPage";
+import { UserDetailsRoute } from "../user-details/UserDetailsRoute";
+
 
 export const router = createBrowserRouter([
     {
@@ -26,7 +28,12 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "/", element: <DashboardPage /> },
                     { path: "/settings", element: <SettingsPage /> },
-                    { path: "/users", element: <UsersPage /> },
+                    {
+                        element: <UserDetailsRoute />,
+                        children: [
+                            { path: "/users", element: <UsersPage /> },
+                        ],
+                    },
 
                     {
                         path: "/clan",

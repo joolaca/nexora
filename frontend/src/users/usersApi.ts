@@ -14,6 +14,13 @@ export type UserListItem = {
     clan: ClanSummary | null;
 };
 
+export type UserPublicData = {
+    id: string;
+    username: string;
+    rank: number;
+    about: string;
+};
+
 export type SortKey = "rank_desc" | "rank_asc" | "username_asc" | "username_desc";
 
 export type UsersListQuery = {
@@ -24,7 +31,6 @@ export type UsersListQuery = {
     maxRank?: number;
     clan?: "any" | "in" | "none";
 };
-
 
 export type UsersListMeta = {
     page: number;
@@ -52,4 +58,8 @@ export function listUsersApi(q: UsersListQuery) {
 
     const suffix = params.toString() ? `?${params.toString()}` : "";
     return apiFetch<UsersListResponse>(`/users${suffix}`, { method: "GET" });
+}
+
+export function getUserPublicDataApi(userId: string) {
+    return apiFetch<UserPublicData>(`/users/${userId}/public`, { method: "GET" });
 }

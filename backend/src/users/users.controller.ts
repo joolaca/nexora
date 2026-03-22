@@ -1,9 +1,11 @@
 // backend/src/users/users.controller.ts
-import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Query, UseGuards,Param } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { UpdateMeDto } from "./dto/update-me.dto";
 import { ListUsersDto } from "./dto/list-users.dto";
+import { UserPublicDto } from "./dto/user-public.dto";
+
 import {
     ApiBearerAuth,
     ApiBadRequestResponse,
@@ -14,6 +16,7 @@ import {
     ApiQuery,
     ApiTags,
     ApiUnauthorizedResponse,
+    ApiParam
 } from "@nestjs/swagger";
 import { AppException } from "../common/errors/app-exception";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -83,4 +86,21 @@ export class UsersController {
             clan: q.clan,
         });
     }
+
+
+
+    @ApiOperation({
+        summary: "Get public user data",
+        description: "Returns public profile data of a user.",
+    })
+    @ApiOkResponse({ type: UserPublicDto })
+    @ApiParam({
+        name: "userId",
+        example: "65f1c8a2...",
+    })
+    @Get(":userId/public")
+    async getPublicUser(@Param("userId") userId: string) {
+        return this.users.getPublicUser(userId);
+    }
+
 }

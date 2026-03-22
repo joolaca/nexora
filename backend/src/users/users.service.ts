@@ -188,4 +188,20 @@ export class UsersService {
             },
         };
     }
+
+    async getPublicUser(userId: string) {
+        const user = await this.usersRepo.findById(userId);
+
+        if (!user) {
+            throw new AppException(404, "USER_NOT_FOUND");
+        }
+
+        return {
+            id: String(user._id),
+            username: user.username,
+            rank: user.rank,
+            about: user.about,
+        };
+    }
+
 }

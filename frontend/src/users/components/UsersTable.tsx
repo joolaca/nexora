@@ -1,14 +1,31 @@
 // src/users/components/UsersTable.tsx
 import type { UserListItem } from "../usersApi";
 import { useTranslation } from "react-i18next";
+import { UserNameLink } from "../../user-details/UserNameLink";
+import { useInviteToClan } from "../../clans/requests/hooks/requests.hooks";
+import { useMyClan } from "../../clans/overview/hooks/overview.hooks";
 
 type Props = {
     users: UserListItem[];
-    onSelect: (id: string) => void;
 };
 
-export function UsersTable({ users, onSelect }: Props) {
+export function UsersTable({ users }: Props) {
     const { t } = useTranslation("user");
+    const { t: tc } = useTranslation("clan");
+
+    const { data: myClan } = useMyClan();
+    const invite = useInviteToClan();
+
+    const canInvite = !!myClan?.id;
+
+    const handleInvite = (userId: string) => {
+        if (!myClan?.id) return;
+
+        invite.mutate({
+            clanId: myClan.id,
+            body: { userId },
+        });
+    };
 
     return (
         <div className="card shadow-sm">
@@ -19,7 +36,7 @@ export function UsersTable({ users, onSelect }: Props) {
                         <th style={{ width: 80 }}>{t("table.rank")}</th>
                         <th>{t("table.username")}</th>
                         <th style={{ width: 220 }}>{t("table.clans")}</th>
-                        <th style={{ width: 120 }}>{t("table.actions")}</th>
+                        <th style={{ width: 160 }}>{t("table.actions")}</th>
                     </tr>
                     </thead>
 
@@ -27,17 +44,33 @@ export function UsersTable({ users, onSelect }: Props) {
                     {users.map((u) => (
                         <tr key={u.id}>
                             <td className="fw-semibold">{u.rank}</td>
-                            <td>{u.username}</td>
+
+                            <td>
+                                <UserNameLink userId={u.id} username={u.username} />
+                            </td>
+
                             <td>
                                 {u.clan ? (
-                                    <span className="badge text-bg-secondary">{u.clan.name}</span>
+                                    <span className="badge text-bg-secondary">
+                                            {u.clan.name}
+                                        </span>
                                 ) : (
-                                    <span className="text-muted">{t("table.noClan")}</span>
+                                    <span className="text-muted">
+                                            {t("table.noClan")}
+                                        </span>
                                 )}
                             </td>
-                            <td className="text-end">
-                                <button className="btn btn-sm btn-outline-primary" onClick={() => onSelect(u.id)}>
-                                    {t("table.details")}
+
+                            <td>
+                                <button
+                                    className="btn btn-sm btn-primary"
+                                    onClick={() => handleInvite(u.id)}
+                                    disabled={!canInvite || invite.isPending}
+                                    title={!canInvite ? tc("invite.disabledTitle") : undefined}
+                                >
+                                    {invite.isPending
+                                        ? tc("invite.buttonInviting")
+                                        : tc("invite.buttonNext")}
                                 </button>
                             </td>
                         </tr>
@@ -53,6 +86,19 @@ export function UsersTable({ users, onSelect }: Props) {
                     </tbody>
                 </table>
             </div>
+
+            {/* TEMP feedback */}
+            {invite.isError && (
+                <div className="alert alert-danger m-2">
+                    {tc("invite.error")}
+                </div>
+            )}
+
+            {invite.isSuccess && (
+                <div className="alert alert-success m-2">
+                    {tc("invite.success")}
+                </div>
+            )}
         </div>
     );
 }
