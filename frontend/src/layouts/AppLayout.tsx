@@ -56,6 +56,14 @@ export function AppLayout() {
                                     {t("nav.clan")}
                                 </NavLink>
                             </li>
+
+                            {auth.isAdmin && (
+                                <li className="nav-item">
+                                    <NavLink className={navLinkClass} to="/admin">
+                                        Admin
+                                    </NavLink>
+                                </li>
+                            )}
                         </ul>
 
                         <div className="d-flex gap-2 align-items-center">

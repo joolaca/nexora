@@ -10,7 +10,7 @@ export const authKeys = {
     me: ["auth", "me"] as const,
 };
 
-const ME_MAX_RETRIES = 5;
+const ME_MAX_RETRIES = 2;
 
 export function useMe() {
     const token = getToken();

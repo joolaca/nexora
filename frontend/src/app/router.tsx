@@ -1,3 +1,4 @@
+// src/app/router.tsx
 import { createBrowserRouter } from "react-router-dom";
 import { LoginPage } from "../pages/LoginPage";
 import { DashboardPage } from "../pages/DashboardPage";
@@ -6,10 +7,11 @@ import { AuthLayout } from "../layouts/AuthLayout";
 import { AppLayout } from "../layouts/AppLayout";
 import { SettingsPage } from "../pages/SettingsPage";
 import { UsersPage } from "../users/components/UsersPage";
-
 import { ClanLayout } from "../clans/ClanLayout";
 import { ClanOverviewPage } from "../clans/overview/pages/ClanOverviewPage";
 import { ClanInvitesList } from "../clans/requests/components/ClanInvitesList";
+import { RequireRole } from "../auth/RequireRole";
+import { AdminPage } from "../admin/AdminPage";
 
 export const router = createBrowserRouter([
     {
@@ -24,6 +26,7 @@ export const router = createBrowserRouter([
                 children: [
                     { path: "/", element: <DashboardPage /> },
                     { path: "/settings", element: <SettingsPage /> },
+                    { path: "/users", element: <UsersPage /> },
 
                     {
                         path: "/clan",
@@ -37,7 +40,15 @@ export const router = createBrowserRouter([
                         ],
                     },
 
-                    { path: "/users", element: <UsersPage /> },
+                    {
+                        element: <RequireRole role="admin" />,
+                        children: [
+                            {
+                                path: "/admin",
+                                element: <AdminPage />,
+                            },
+                        ],
+                    },
                 ],
             },
         ],

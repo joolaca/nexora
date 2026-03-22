@@ -9,7 +9,8 @@ export default defineConfig({
     proxy: {
       "/auth": { target: "http://backend:5000", changeOrigin: true, },
       "/users": { target: "http://backend:5000", changeOrigin: true },
-      "/clans": { target: "http://backend:5000", changeOrigin: true }
+      "/clans": { target: "http://backend:5000", changeOrigin: true },
+      "/internal": { target: "http://backend:5000", changeOrigin: true },
     },
   },
 });
