@@ -11,8 +11,11 @@ export function AdminPage() {
         onSuccess: (data) => {
             setResult(JSON.stringify(data, null, 2));
         },
-        onError: (error) => {
+        /*onError: (error) => {
             setResult(JSON.stringify(error, null, 2));
+        },*/
+        onError: (error: any) => {
+            setResult(JSON.stringify(error?.body ?? error, null, 2));
         },
     });
 

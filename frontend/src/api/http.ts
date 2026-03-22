@@ -40,9 +40,11 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
                 ? fail.error.message.join(", ")
                 : fail?.error?.message) || "Request failed";
 
+        const errorCode = fail?.error?.code ?? fail?.error?.errorCode;
+
         const isInvalidToken =
             res.status === 401 ||
-            (res.status === 409 && fail?.error?.code === "INVALID_TOKEN");
+            (res.status === 409 && errorCode === "INVALID_TOKEN");
 
         if (isInvalidToken) clearToken();
 

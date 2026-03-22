@@ -1,6 +1,15 @@
 // src/notifications/NotificationsProvider.tsx
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+    type ReactNode,
+} from "react";
 import { NotificationsViewport } from "./NotificationsViewport";
+import { registerNotificationBridge } from "./notificationBridge";
 
 export type NotificationType = "success" | "error" | "info";
 
@@ -48,6 +57,14 @@ export function NotificationsProvider({ children }: Props) {
             info: (message: string) => push("info", message),
         },
     }), [push]);
+
+    useEffect(() => {
+        registerNotificationBridge({
+            success: value.notify.success,
+            error: value.notify.error,
+            info: value.notify.info,
+        });
+    }, [value]);
 
     return (
         <NotificationsContext.Provider value={value}>
