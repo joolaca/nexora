@@ -1,18 +1,25 @@
-// src/pages/LoginPage.tsx
+//frontend/src/pages/LoginPage.tsx
 import { FormEvent, useMemo, useState } from "react";
-import { useAuth, useLogin } from "../auth/authHooks";
+import { useAuth, useLogin, useRegister } from "../auth/authHooks";
 import { Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { translateApiError } from "../i18n/translateApiError";
 
 const AUTH_FLASH_KEY = "auth_error_flash";
 
+type AuthMode = "login" | "register";
+
 export function LoginPage() {
     const { t } = useTranslation();
     const auth = useAuth();
+
+    const [mode, setMode] = useState<AuthMode>("login");
     const [username, setUsername] = useState("user1");
     const [password, setPassword] = useState("123");
+    const [successMessage, setSuccessMessage] = useState("");
+
     const login = useLogin();
+    const register = useRegister();
 
     const flashError = useMemo(() => {
         const msg = sessionStorage.getItem(AUTH_FLASH_KEY);
@@ -30,16 +37,67 @@ export function LoginPage() {
 
     const onSubmit = (e: FormEvent) => {
         e.preventDefault();
-        login.mutate({ username, password });
+        setSuccessMessage("");
+
+        if (mode === "login") {
+            login.mutate({ username, password });
+            return;
+        }
+
+        register.mutate(
+            { username, password },
+            {
+                onSuccess: () => {
+                    setSuccessMessage("Sikeres regisztráció. Most már be tudsz jelentkezni.");
+                    setMode("login");
+                },
+            }
+        );
     };
 
-    const errorMsg = login.isError ? translateApiError(login.error, t, "login.failed") : "";
-    const visibleError = errorMsg || flashError;
+    const loginError =
+        mode === "login" && login.isError
+            ? translateApiError(login.error, t, "login.failed")
+            : "";
+
+    const registerError =
+        mode === "register" && register.isError
+            ? translateApiError(register.error, t, "register.failed")
+            : "";
+
+    const visibleError = loginError || registerError || flashError;
+    const isPending = mode === "login" ? login.isPending : register.isPending;
 
     return (
         <div className="card shadow-sm">
             <div className="card-body">
-                <h2 className="h4 mb-3">{t("login.title")}</h2>
+                <div className="d-flex gap-2 mb-3">
+                    <button
+                        type="button"
+                        className={`btn ${mode === "login" ? "btn-primary" : "btn-outline-primary"}`}
+                        onClick={() => {
+                            setMode("login");
+                            setSuccessMessage("");
+                        }}
+                    >
+                        {t("login.title")}
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`btn ${mode === "register" ? "btn-primary" : "btn-outline-primary"}`}
+                        onClick={() => {
+                            setMode("register");
+                            setSuccessMessage("");
+                        }}
+                    >
+                        Regisztráció
+                    </button>
+                </div>
+
+                <h2 className="h4 mb-3">
+                    {mode === "login" ? t("login.title") : "Regisztráció"}
+                </h2>
 
                 <form onSubmit={onSubmit}>
                     <div className="mb-3">
@@ -65,14 +123,26 @@ export function LoginPage() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            autoComplete="current-password"
+                            autoComplete={mode === "login" ? "current-password" : "new-password"}
                         />
                     </div>
 
-                    {!!visibleError && <div className="alert alert-danger py-2">{visibleError}</div>}
+                    {!!successMessage && (
+                        <div className="alert alert-success py-2">{successMessage}</div>
+                    )}
 
-                    <button className="btn btn-primary w-100" type="submit" disabled={login.isPending}>
-                        {login.isPending ? t("login.pending") : t("login.submit")}
+                    {!!visibleError && (
+                        <div className="alert alert-danger py-2">{visibleError}</div>
+                    )}
+
+                    <button className="btn btn-primary w-100" type="submit" disabled={isPending}>
+                        {isPending
+                            ? mode === "login"
+                                ? t("login.pending")
+                                : "Regisztráció folyamatban..."
+                            : mode === "login"
+                                ? t("login.submit")
+                                : "Regisztráció"}
                     </button>
                 </form>
             </div>

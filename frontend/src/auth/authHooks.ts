@@ -1,6 +1,12 @@
-// src/auth/authHooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { loginApi, meApi, updateMeApi, type AuthUser, type UserRole } from "./authApi";
+import {
+    loginApi,
+    meApi,
+    registerApi,
+    updateMeApi,
+    type AuthUser,
+    type UserRole,
+} from "./authApi";
 import { setToken, getToken, clearToken } from "./tokenStorage";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -50,6 +56,13 @@ export function useLogin() {
             setToken(data.token);
             await qc.invalidateQueries({ queryKey: authKeys.me });
         },
+    });
+}
+
+export function useRegister() {
+    return useMutation({
+        mutationFn: ({ username, password }: { username: string; password: string }) =>
+            registerApi(username, password),
     });
 }
 

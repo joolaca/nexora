@@ -1,4 +1,4 @@
-// src/auth/authApi.ts
+//frontend/src/auth/authApi.ts
 import { apiFetch } from "../api/http";
 
 export type UserRole = "admin" | "user";
@@ -24,8 +24,24 @@ export type UpdateMeRequest = {
 
 export type UpdateMeResponse = AuthUser;
 
+export type RegisterRequest = {
+    username: string;
+    password: string;
+};
+
+export type RegisterResponse = {
+    message?: string;
+};
+
 export function loginApi(username: string, password: string) {
     return apiFetch<LoginResponse>("/auth/login", {
+        method: "POST",
+        body: { username, password },
+    });
+}
+
+export function registerApi(username: string, password: string) {
+    return apiFetch<RegisterResponse>("/auth/register", {
         method: "POST",
         body: { username, password },
     });
