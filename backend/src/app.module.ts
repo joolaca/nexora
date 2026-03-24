@@ -1,4 +1,3 @@
-//backend/src/app.module.ts
 import { Module, MiddlewareConsumer, NestModule } from "@nestjs/common";
 import { RequestLoggerMiddleware } from "./common/middleware/request-logger.middleware";
 import { MongooseModule } from "@nestjs/mongoose";

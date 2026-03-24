@@ -1,4 +1,3 @@
-//backend/src/clans/management/clan-management.repository.ts
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { ClientSession, Model, Types } from "mongoose";

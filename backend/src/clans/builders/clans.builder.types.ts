@@ -1,4 +1,3 @@
-// backend/src/clans/builders/clans.builder.types.ts
 
 export type CreateClanBuilderInput = {
     ownerUserId: string;

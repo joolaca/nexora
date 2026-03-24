@@ -1,4 +1,3 @@
-// backend/src/common/errors/app-exception.ts
 import { HttpException, HttpStatus } from "@nestjs/common";
 
 export type ErrorCode = string;

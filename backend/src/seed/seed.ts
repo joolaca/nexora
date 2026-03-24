@@ -1,4 +1,3 @@
-// backend/src/seed/seed.ts
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import * as dotenv from "dotenv";

@@ -1,4 +1,3 @@
-// backend/src/clans/overview/clan-overview.controller.ts
 import { Controller, Get, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
 import { ClanOverviewService } from "./clan-overview.service";

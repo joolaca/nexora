@@ -1,4 +1,3 @@
-// backend/src/clans/guards/clan-permission.guard.ts
 import {
     CanActivate,
     ExecutionContext,

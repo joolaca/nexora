@@ -1,4 +1,3 @@
-//backend/src/common/interceptors/response-wrap.interceptor.ts
 import {
     CallHandler,
     ExecutionContext,

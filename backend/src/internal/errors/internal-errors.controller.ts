@@ -1,4 +1,3 @@
-// backend/src/internal/errors/internal-errors.controller.ts
 import {
     Controller,
     Get,

@@ -1,4 +1,3 @@
-// backend/src/internal/errors/test/internal-errors-auth.integration.spec.ts
 // npx jest internal-errors-auth.integration.spec.ts --runInBand
 
 import request from "supertest";

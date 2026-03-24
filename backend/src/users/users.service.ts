@@ -1,4 +1,3 @@
-// backend/src/users/users.service.ts
 import { Injectable } from "@nestjs/common";
 import * as bcrypt from "bcryptjs";
 import { UpdateMeDto } from "./dto/update-me.dto";

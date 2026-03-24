@@ -1,4 +1,3 @@
-// backend/src/users/users.factory.ts
 import { Injectable } from "@nestjs/common";
 import { CreateUserInput, CreateUserOverrides } from "./users.types";
 import { UserRole } from "./user-role.enum";

@@ -1,4 +1,3 @@
-// backend/src/users/users.types.ts
 import { UserRole } from "./user-role.enum";
 
 export type CreateUserInput = {

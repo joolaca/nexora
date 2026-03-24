@@ -1,4 +1,3 @@
-// backend/src/clans/management/test/clan-create-idempotency.integration.spec.ts
 // npx jest clan-create-idempotency.integration.spec.ts --runInBand
 
 import request from "supertest";

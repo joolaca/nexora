@@ -1,4 +1,3 @@
-//backend/src/common/utils/sanitize-sensitive-fields.util.ts
 const MASK = "***";
 
 const SENSITIVE_KEYS = new Set([

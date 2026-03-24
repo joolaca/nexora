@@ -1,4 +1,3 @@
-// backend/src/clans/clans.seed.ts
 import { Model, Types } from "mongoose";
 import { ClanDocument } from "./clans.schema";
 import { BaseRoles } from "../roles/clan-roles.constants";

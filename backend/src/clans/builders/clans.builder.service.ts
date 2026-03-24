@@ -1,4 +1,3 @@
-// backend/src/clans/builders/clans.builder.service.ts
 import { Injectable } from "@nestjs/common";
 import { ClanManagementService } from "../management/clan-management.service";
 import { ClansBuilderFactory } from "./clans.builder.factory";

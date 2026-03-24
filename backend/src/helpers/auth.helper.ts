@@ -1,4 +1,3 @@
-// backend/src/helpers/auth.helper.ts
 import { JwtService } from "@nestjs/jwt";
 
 export function createTestJwt(params: {

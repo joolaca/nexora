@@ -1,4 +1,3 @@
-// backend/src/clans/builders/clans.builder.factory.ts
 import { Injectable } from "@nestjs/common";
 import {
     CreateClanBuilderInput,

@@ -1,4 +1,3 @@
-// backend/src/auth/admin.guard.ts
 import {
     CanActivate,
     ExecutionContext,

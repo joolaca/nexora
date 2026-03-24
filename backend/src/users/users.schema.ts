@@ -1,4 +1,3 @@
-// backend/src/users/users.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { UserRole } from "./user-role.enum";

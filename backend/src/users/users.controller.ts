@@ -1,4 +1,3 @@
-// backend/src/users/users.controller.ts
 import { Body, Controller, Get, Patch, Query, UseGuards,Param } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";

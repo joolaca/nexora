@@ -1,4 +1,3 @@
-// backend/src/clans/dto/create-clan.dto.ts
 import { IsString, MaxLength, MinLength, Matches, IsOptional } from "class-validator";
 
 export class CreateClanDto {

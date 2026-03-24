@@ -1,4 +1,3 @@
-// backend/src/clans/overview/clan-overview.service.ts
 import { Injectable } from "@nestjs/common";
 import { AppException } from "../../common/errors/app-exception";
 import { ClansOverviewRepository } from "./clan-overview.repository";

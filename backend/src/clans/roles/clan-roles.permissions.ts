@@ -1,4 +1,3 @@
-// backend/src/clans/permissions.ts
 export const ClanPermissions = {
     Edit: "clan.edit",
     WallWrite: "clan.wall.write",

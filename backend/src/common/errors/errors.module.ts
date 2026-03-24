@@ -1,4 +1,3 @@
-//backend/src/common/errors/errors.module.ts
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ErrorLog, ErrorLogSchema } from "./error-log.schema";

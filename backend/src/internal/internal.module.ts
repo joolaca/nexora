@@ -1,4 +1,3 @@
-// backend/src/internal/internal.module.ts
 import { Module } from "@nestjs/common";
 import { InternalErrorsController } from "./errors/internal-errors.controller";
 import { AdminGuard } from "../auth/admin.guard";

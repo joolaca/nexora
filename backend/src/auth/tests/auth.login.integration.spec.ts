@@ -1,4 +1,3 @@
-// backend/src/auth/tests/auth.login.integration.spec.ts
 // npx jest auth.login.integration.spec.ts --runInBand
 
 import request from "supertest";

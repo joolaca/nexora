@@ -1,4 +1,3 @@
-// backend/src/clans/requests/test/clan-invite.integration.spec.ts
 // npx jest clan-invite.integration.spec.ts --runInBand
 
 import request from "supertest";
