@@ -1,4 +1,3 @@
-// src/clans/overview/hooks/overview.hooks.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClanApi, editClanApi, myClanApi } from "../api/overview.api";
 

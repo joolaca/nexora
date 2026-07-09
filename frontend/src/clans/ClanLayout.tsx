@@ -1,6 +1,7 @@
-// src/clans/ClanLayout.tsx
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useMyClan } from "./overview/hooks/overview.hooks";
+import { canManageClanRequests } from "./permissions/clan-permissions.service";
 
 function tabClass({ isActive }: { isActive: boolean }) {
     return `nav-link${isActive ? " active" : ""}`;
@@ -8,6 +9,9 @@ function tabClass({ isActive }: { isActive: boolean }) {
 
 export function ClanLayout() {
     const { t } = useTranslation("clan");
+    const myClan = useMyClan();
+
+    const showRequestsMenu = canManageClanRequests(myClan.data);
 
     return (
         <div className="container">
@@ -22,11 +26,13 @@ export function ClanLayout() {
                     </NavLink>
                 </li>
 
-                <li className="nav-item">
-                    <NavLink to="requests/invite" className={tabClass}>
-                        {t("menu.requests")}
-                    </NavLink>
-                </li>
+                {showRequestsMenu && (
+                    <li className="nav-item">
+                        <NavLink to="requests/invite" className={tabClass}>
+                            {t("menu.requests")}
+                        </NavLink>
+                    </li>
+                )}
             </ul>
 
             <Outlet />
