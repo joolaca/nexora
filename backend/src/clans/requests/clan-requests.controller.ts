@@ -1,15 +1,16 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "../../auth/jwt-auth.guard";
-import { ClanRequestService } from "./clan-requests.service";
-import { InviteToClanDto } from "./dto/invite.dto";
-import { ClanPermissionGuard } from "../guards/clan-permission.guard";
-import { RequireClanPermission } from "../guards/require-clan-permission.decorator";
-import { ClanPermissions } from "../roles/clan-roles.permissions";
+import {Body, Controller, Get, Param, Post, Req, UseGuards} from "@nestjs/common";
+import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
+import {ClanRequestService} from "./clan-requests.service";
+import {InviteToClanDto} from "./dto/invite.dto";
+import {ClanPermissionGuard} from "../guards/clan-permission.guard";
+import {RequireClanPermission} from "../guards/require-clan-permission.decorator";
+import {ClanPermissions} from "../roles/clan-roles.permissions";
 
 @UseGuards(JwtAuthGuard)
 @Controller("clans")
 export class ClanRequestController {
-    constructor(private readonly requests: ClanRequestService) {}
+    constructor(private readonly requests: ClanRequestService) {
+    }
 
     // CLAN -> USER invite
     @Post("invite")
@@ -23,7 +24,6 @@ export class ClanRequestController {
         });
     }
 
-    // my requests (user oldalon: apply + invite listázás)
     @Get("requests/me")
     my(@Req() req: any) {
         return this.requests.listMyRequests(req.user.userId);
@@ -37,4 +37,17 @@ export class ClanRequestController {
             clanId: req.clanAuth.clanId,
         });
     }
+
+
+    @Post("requests/:requestId/cancel")
+    @UseGuards(ClanPermissionGuard)
+    @RequireClanPermission(ClanPermissions.RequestsManage)
+    cancelInvite(@Req() req: any, @Param("requestId") requestId: string) {
+        return this.requests.cancelInvite({
+            actorUserId: req.clanAuth.actorUserId,
+            clanId: req.clanAuth.clanId,
+            requestId,
+        });
+    }
+
 }
