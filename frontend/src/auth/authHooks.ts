@@ -53,6 +53,7 @@ export function useLogin() {
         mutationFn: ({ username, password }: { username: string; password: string }) =>
             loginApi(username, password),
         onSuccess: async (data) => {
+            qc.clear();
             setToken(data.token);
             await qc.invalidateQueries({ queryKey: authKeys.me });
         },
@@ -83,7 +84,7 @@ export function useLogout() {
 
     return useCallback(() => {
         clearToken();
-        qc.removeQueries({ queryKey: authKeys.me });
+        qc.clear();
         navigate("/login", { replace: true });
     }, [qc, navigate]);
 }
