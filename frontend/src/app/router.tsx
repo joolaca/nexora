@@ -10,6 +10,7 @@ import { UsersPage } from "../users/components/UsersPage";
 import { ClanLayout } from "../clans/ClanLayout";
 import { ClanOverviewPage } from "../clans/overview/pages/ClanOverviewPage";
 import { ClanInvitesList } from "../clans/requests/components/ClanInvitesList";
+import { MyClanInvitesPage } from "../clans/my-requests/pages/MyClanInvitesPage";
 import { RequireRole } from "../auth/RequireRole";
 import { AdminPage } from "../admin/AdminPage";
 import { UserDetailsRoute } from "../user-details/UserDetailsRoute";
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
                             {
                                 path: "requests/invite",
                                 element: <ClanInvitesList />,
+                            },
+                            {
+                                path: "my-invites",
+                                element: <MyClanInvitesPage />,
                             },
                         ],
                     },

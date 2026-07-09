@@ -22,9 +22,6 @@ export class ClanRequestService {
         });
     }
 
-    async listMyRequests(userId: string) {
-        return this.reqRepo.listForUser(userId);
-    }
 
     async getInviteRequestsList(params: { clanId: string }) {
         return this.reqRepo.listPendingInvitesForClan(params.clanId);
@@ -64,6 +61,10 @@ export class ClanRequestService {
             requestId: String(request._id),
             status: "CANCELLED",
         };
+    }
+
+    async getMyInvites(userId: string) {
+        return this.reqRepo.listMyPendingInvites(userId);
     }
 
 }

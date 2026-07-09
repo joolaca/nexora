@@ -24,11 +24,6 @@ export class ClanRequestController {
         });
     }
 
-    @Get("requests/me")
-    my(@Req() req: any) {
-        return this.requests.listMyRequests(req.user.userId);
-    }
-
     @Get("requests/invites/pending")
     @UseGuards(ClanPermissionGuard)
     @RequireClanPermission(ClanPermissions.RequestsManage)
@@ -48,6 +43,11 @@ export class ClanRequestController {
             clanId: req.clanAuth.clanId,
             requestId,
         });
+    }
+
+    @Get("requests/my-invites")
+    myInvites(@Req() req: any) {
+        return this.requests.getMyInvites(req.user.userId);
     }
 
 }

@@ -11,6 +11,7 @@ export function ClanLayout() {
     const { t } = useTranslation("clan");
     const myClan = useMyClan();
 
+
     const showRequestsMenu = canManageClanRequests(myClan.data);
 
     return (
@@ -33,6 +34,14 @@ export function ClanLayout() {
                         </NavLink>
                     </li>
                 )}
+
+
+                <li className="nav-item">
+                    <NavLink to="my-invites" className={tabClass}>
+                        {t("menu.myInvites")}
+                    </NavLink>
+                </li>
+
             </ul>
 
             <Outlet />

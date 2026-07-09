@@ -84,13 +84,6 @@ export class ClanRequestRepository {
         );
     }
 
-    async listForUser(userId: string) {
-        return this.reqModel
-            .find({ userId: new Types.ObjectId(userId) }, { clanId: 1, userId: 1, type: 1, status: 1, createdAt: 1, updatedAt: 1 })
-            .sort({ createdAt: -1 })
-            .lean()
-            .exec();
-    }
 
     async listPendingForClan(clanId: string) {
         return this.reqModel
@@ -148,4 +141,67 @@ export class ClanRequestRepository {
             username: r.username ?? null,
         }));
     }
+
+    async listMyPendingInvites(userId: string) {
+        const userObjectId = new Types.ObjectId(userId);
+
+        const rows = await this.reqModel
+            .aggregate([
+                {
+                    $match: {
+                        userId: userObjectId,
+                        type: "INVITE",
+                        status: "PENDING",
+                    },
+                },
+                { $sort: { createdAt: -1 } },
+                {
+                    $lookup: {
+                        from: "clans",
+                        localField: "clanId",
+                        foreignField: "_id",
+                        as: "clan",
+                    },
+                },
+                { $unwind: { path: "$clan", preserveNullAndEmptyArrays: true } },
+                {
+                    $project: {
+                        _id: 1,
+                        requestId: { $toString: "$_id" },
+                        clanId: 1,
+                        userId: 1,
+                        type: 1,
+                        status: 1,
+                        createdByUserId: 1,
+                        createdAt: 1,
+
+                        clanName: "$clan.name",
+                        clanDescription: "$clan.description",
+                        clanOwnerUserId: "$clan.ownerUserId",
+                        clanMemberCount: "$clan.memberCount",
+                    },
+                },
+            ])
+            .exec();
+
+
+        return rows.map((r: any) => ({
+            requestId: String(r._id),
+            clanId: String(r.clanId),
+            userId: String(r.userId),
+            type: r.type,
+            status: r.status,
+            createdByUserId: String(r.createdByUserId),
+            createdAt: r.createdAt,
+
+            clan: {
+                id: String(r.clanId),
+                name: r.clanName ?? null,
+                description: r.clanDescription ?? null,
+                ownerUserId: r.clanOwnerUserId ? String(r.clanOwnerUserId) : null,
+                memberCount: r.clanMemberCount ?? null,
+            },
+        }));
+    }
+
 }
